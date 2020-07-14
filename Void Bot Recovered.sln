@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Void Bot Recovered", "Void Bot Recovered\Void Bot Recovered.csproj", "{0F7D8236-D373-49CF-8E1A-778DFFC98AC9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0F7D8236-D373-49CF-8E1A-778DFFC98AC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F7D8236-D373-49CF-8E1A-778DFFC98AC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F7D8236-D373-49CF-8E1A-778DFFC98AC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F7D8236-D373-49CF-8E1A-778DFFC98AC9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E392A311-EE55-4847-A2CF-3A7B26A0D5FA}
+	EndGlobalSection
+EndGlobal
