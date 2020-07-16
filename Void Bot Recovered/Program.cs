@@ -82,6 +82,7 @@ namespace Void_Bot_Recovered
                     await e.Message.DeleteAsync();
                     await e.Channel.SendMessageAsync("incorrect, " + e.Author.Mention);
                 }
+                else if (e.Channel.
             }
         }
 
