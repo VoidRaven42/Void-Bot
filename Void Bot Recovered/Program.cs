@@ -82,7 +82,10 @@ namespace Void_Bot_Recovered
                     await e.Message.DeleteAsync();
                     await e.Channel.SendMessageAsync("incorrect, " + e.Author.Mention);
                 }
-                else if (e.Channel.
+                else if (e.Channel.Id.Equals(723174937619070976) && e.Author.Id.Equals(291665243992752141) && bool.Parse(Environment.GetEnvironmentVariable("IsHarisBeingATwat")))
+                {
+                    await e.Message.DeleteAsync();
+                }
             }
         }
 

@@ -251,6 +251,14 @@ namespace Void_Bot_Recovered
             }
         }
 
+        [Command("shutupharis")]
+        [RequirePermissions(Permissions.ManageMessages)]
+        public async Task Shutup(CommandContext ctx)
+        {
+            Environment.SetEnvironmentVariable("IsHarisBeingATwat", "true");
+            await ctx.RespondAsync("Haris is now being suppressed");
+        }
+
         public class Globals
         {
             public DiscordClient client;
