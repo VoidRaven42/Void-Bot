@@ -12,7 +12,6 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
-using Void_Bot;
 
 namespace Void_Bot
 {
@@ -85,7 +84,7 @@ namespace Void_Bot
                 }
                 else if (e.Channel.Id.Equals(723174937619070976) && e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
                 {
-                    await e.Message.DeleteAsync();
+                    //await e.Message.DeleteAsync();
                 }
             }
         }
