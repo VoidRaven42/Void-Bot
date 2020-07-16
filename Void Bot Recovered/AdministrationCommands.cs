@@ -15,7 +15,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
-namespace Void_Bot_Recovered
+namespace Void_Bot
 {
     public class AdministrationCommands : BaseCommandModule
     {
@@ -255,7 +255,7 @@ namespace Void_Bot_Recovered
         [RequirePermissions(Permissions.ManageMessages)]
         public async Task Shutup(CommandContext ctx)
         {
-            Environment.SetEnvironmentVariable("IsHarisBeingATwat", "true");
+            Settings.Default.IsHarisATwat = true;
             await ctx.RespondAsync("Haris is now being suppressed");
         }
 

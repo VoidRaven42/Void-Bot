@@ -13,7 +13,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Newtonsoft.Json.Linq;
 
-namespace Void_Bot_Recovered
+namespace Void_Bot
 {
     public class Commands : BaseCommandModule
     {

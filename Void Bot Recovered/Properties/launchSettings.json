@@ -1,10 +1,7 @@
 {
   "profiles": {
     "Void Bot Recovered": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "IsHarisBeingATwat": "false"
-      }
+      "commandName": "Project"
     }
   }
 }

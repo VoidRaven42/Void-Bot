@@ -12,8 +12,9 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using Void_Bot;
 
-namespace Void_Bot_Recovered
+namespace Void_Bot
 {
     public class Program
     {
@@ -82,7 +83,7 @@ namespace Void_Bot_Recovered
                     await e.Message.DeleteAsync();
                     await e.Channel.SendMessageAsync("incorrect, " + e.Author.Mention);
                 }
-                else if (e.Channel.Id.Equals(723174937619070976) && e.Author.Id.Equals(291665243992752141) && bool.Parse(Environment.GetEnvironmentVariable("IsHarisBeingATwat")))
+                else if (e.Channel.Id.Equals(723174937619070976) && e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
                 {
                     await e.Message.DeleteAsync();
                 }
