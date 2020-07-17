@@ -244,8 +244,6 @@ namespace Void_Bot
                         return;
                 }
 
-                Settings.Default.Status = activity;
-                Settings.Default.Save();
                 await Program.discord.UpdateStatusAsync(activity);
             }
             else

@@ -68,10 +68,6 @@ namespace Void_Bot
             commands.CommandExecuted += Commands_CommandExecuted;
             discord.MessageCreated += Discord_MessageCreated;
             await discord.ConnectAsync();
-            if (Settings.Default.Status != null)
-            {
-                await discord.UpdateStatusAsync(Settings.Default.Status);
-            }
             await Task.Delay(-1);
         }
 
