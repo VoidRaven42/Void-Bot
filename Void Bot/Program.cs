@@ -12,7 +12,6 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
-using Void_Bot_Recovered;
 
 namespace Void_Bot
 {

@@ -14,7 +14,6 @@ using DSharpPlus.Entities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Void_Bot_Recovered;
 
 namespace Void_Bot
 {

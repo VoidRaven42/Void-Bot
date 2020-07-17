@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Void_Bot_Recovered {
+namespace Void_Bot {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
