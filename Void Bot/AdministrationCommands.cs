@@ -14,6 +14,7 @@ using DSharpPlus.Entities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Void_Bot_Recovered;
 
 namespace Void_Bot
 {
@@ -35,7 +36,7 @@ namespace Void_Bot
                 var sopts = ScriptOptions.Default.AddImports("System", "System.Collections.Generic", "System.Diagnostics",
                     "System.Linq", "System.Net.Http", "System.Net.Http.Headers", "System.Reflection", "System.Text",
                     "System.Threading", "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.CommandsNext",
-                    "DSharpPlus.Entities", "DSharpPlus.EventArgs", "DSharpPlus.Exceptions", "Void_Bot").AddReferences(
+                    "DSharpPlus.Entities", "DSharpPlus.EventArgs", "DSharpPlus.Exceptions", "Void_Bot", "Void_Bot_Recovered").AddReferences(
                     from xa in AppDomain.CurrentDomain.GetAssemblies()
                     where !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location)
                     select xa).WithAllowUnsafe(true);
@@ -243,6 +244,8 @@ namespace Void_Bot
                         return;
                 }
 
+                Settings.Default.Status = activity;
+                Settings.Default.Save();
                 await Program.discord.UpdateStatusAsync(activity);
             }
             else
@@ -256,9 +259,18 @@ namespace Void_Bot
         public async Task Shutup(CommandContext ctx)
         {
             Settings.Default.IsHarisATwat = true;
+            Settings.Default.Save();
             await ctx.RespondAsync("Haris is now being suppressed");
         }
 
+        [Command("unshutupharis")]
+        [RequirePermissions(Permissions.ManageMessages)]
+        public async Task UnShutup(CommandContext ctx)
+        {
+            Settings.Default.IsHarisATwat = false;
+            Settings.Default.Save();
+            await ctx.RespondAsync("Haris is no longer being suppressed");
+        }
         public class Globals
         {
             public DiscordClient client;

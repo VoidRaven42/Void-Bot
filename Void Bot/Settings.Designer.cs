@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Void_Bot {
+namespace Void_Bot_Recovered {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -32,6 +32,17 @@ namespace Void_Bot {
             }
             set {
                 this["IsHarisATwat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::DSharpPlus.Entities.DiscordActivity Status {
+            get {
+                return ((global::DSharpPlus.Entities.DiscordActivity)(this["Status"]));
+            }
+            set {
+                this["Status"] = value;
             }
         }
     }

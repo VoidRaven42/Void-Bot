@@ -12,6 +12,7 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using Void_Bot_Recovered;
 
 namespace Void_Bot
 {
@@ -48,6 +49,7 @@ namespace Void_Bot
                 UseInternalLogHandler = true,
                 LogLevel = LogLevel.Info
             });
+            
             var icfg = new InteractivityConfiguration
             {
                 Timeout = TimeSpan.FromSeconds(20.0)
@@ -66,6 +68,10 @@ namespace Void_Bot
             commands.CommandExecuted += Commands_CommandExecuted;
             discord.MessageCreated += Discord_MessageCreated;
             await discord.ConnectAsync();
+            if (Settings.Default.Status != null)
+            {
+                await discord.UpdateStatusAsync(Settings.Default.Status);
+            }
             await Task.Delay(-1);
         }
 
@@ -152,9 +158,9 @@ namespace Void_Bot
 
         private static void OnProcessExit(object sender, EventArgs e)
         {
-            Console.WriteLine("Disconnecting, then exiting in 1 second");
+            Console.WriteLine("Disconnecting, then exiting in 2 seconds");
             discord.DisconnectAsync();
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
         }
 
         private static Task<int> ResolvePrefix(DiscordMessage msg)
