@@ -19,6 +19,12 @@ namespace Void_Bot
 {
     public class AdministrationCommands : BaseCommandModule
     {
+        [Command("turnofflifesupport")]
+        public async Task LifeSupport(CommandContext ctx)
+        {
+            await ctx.RespondAsync("Grandma has been terminated.");
+        }
+
         [Command("eval")]
         public async Task Eval(CommandContext ctx, [RemainingText] [Description("Code to evaluate.")]
             string code)
@@ -35,7 +41,7 @@ namespace Void_Bot
                 var sopts = ScriptOptions.Default.AddImports("System", "System.Collections.Generic", "System.Diagnostics",
                     "System.Linq", "System.Net.Http", "System.Net.Http.Headers", "System.Reflection", "System.Text",
                     "System.Threading", "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.CommandsNext",
-                    "DSharpPlus.Entities", "DSharpPlus.EventArgs", "DSharpPlus.Exceptions", "Void_Bot", "Void_Bot_Recovered").AddReferences(
+                    "DSharpPlus.Entities", "DSharpPlus.EventArgs", "DSharpPlus.Exceptions", "Void_Bot").AddReferences(
                     from xa in AppDomain.CurrentDomain.GetAssemblies()
                     where !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location)
                     select xa).WithAllowUnsafe(true);
@@ -215,8 +221,22 @@ namespace Void_Bot
                     case "":
                     case "remove":
                     case "none":
+                        Settings.Default.IsStatus = false;
+                        Settings.Default.Save();
                         await Program.discord.UpdateStatusAsync();
                         return;
+                }
+
+                if (status.ToLower() == "users")
+                {
+                    var amount = 0;
+                    var client = Program.discord;
+                    foreach (var elem in client.Guilds)
+                    {
+                        amount += elem.Value.Members.Count;
+                    }
+
+                    status = amount.ToString() + " users";
                 }
 
                 new DiscordActivity();
@@ -227,8 +247,6 @@ namespace Void_Bot
                         activity = new DiscordActivity(status, ActivityType.Playing);
                         break;
                     case "listening":
-                        activity = new DiscordActivity(status, ActivityType.ListeningTo);
-                        break;
                     case "listeningto":
                         activity = new DiscordActivity(status, ActivityType.ListeningTo);
                         break;
@@ -242,7 +260,8 @@ namespace Void_Bot
                         await ctx.RespondAsync("Invalid activity specified");
                         return;
                 }
-
+                Settings.Default.IsStatus = true;
+                Settings.Default.Save();
                 await Program.discord.UpdateStatusAsync(activity);
             }
             else
@@ -253,8 +272,15 @@ namespace Void_Bot
 
         [Command("shutupharis")]
         [RequirePermissions(Permissions.ManageMessages)]
+        [Hidden]
         public async Task Shutup(CommandContext ctx)
         {
+            if (!ctx.Guild.Members.ContainsKey(291665243992752141))
+            {
+                await ctx.RespondAsync("Haris is not here");
+                return;
+            }
+
             Settings.Default.IsHarisATwat = true;
             Settings.Default.Save();
             await ctx.RespondAsync("Haris is now being suppressed");
@@ -262,8 +288,14 @@ namespace Void_Bot
 
         [Command("unshutupharis")]
         [RequirePermissions(Permissions.ManageMessages)]
+        [Hidden]
         public async Task UnShutup(CommandContext ctx)
         {
+            if (!ctx.Guild.Members.ContainsKey(291665243992752141))
+            {
+                await ctx.RespondAsync("Haris is not here");
+                return;
+            }
             Settings.Default.IsHarisATwat = false;
             Settings.Default.Save();
             await ctx.RespondAsync("Haris is no longer being suppressed");

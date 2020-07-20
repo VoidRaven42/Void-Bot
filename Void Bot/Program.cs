@@ -67,27 +67,58 @@ namespace Void_Bot
             commands.CommandExecuted += Commands_CommandExecuted;
             discord.MessageCreated += Discord_MessageCreated;
             await discord.ConnectAsync();
-            await Task.Delay(-1);
+            await Task.Delay(2000);
+            while (true)
+            {
+                if (!Settings.Default.IsStatus)
+                {
+                    var amount = 0;
+
+                    foreach (var elem in discord.Guilds)
+                    {
+                        amount += elem.Value.Members.Count;
+                    }
+
+                    var status = amount + " users";
+                    DiscordActivity activity = new DiscordActivity(status, ActivityType.Watching);
+                    await discord.UpdateStatusAsync(activity);
+                }
+
+                await Task.Delay(/*TimeSpan.FromMinutes(1)*/10000);
+
+                if (!Settings.Default.IsStatus)
+                {
+                    var amount = discord.Guilds.Count;
+
+                    var status = amount + " servers";
+                    DiscordActivity activity = new DiscordActivity(status, ActivityType.Watching);
+                    await discord.UpdateStatusAsync(activity);
+                }
+
+                await Task.Delay(/*TimeSpan.FromMinutes(1)*/10000);
+            }
         }
 
         private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
         {
-            if (!(e.Guild == null) && e.Guild.Id.ToString() == "642067509931147264")
+            if (!(e.Guild == null) && e.Guild.Id.ToString() == "642067509931147264" && !e.Author.IsBot)
             {
-                if (e.Message.Content.ToLower().Contains("kiran"))
-                {
-                    await e.Channel.SendMessageAsync("*Kieran");
-                }
-                else if (e.Message.Content.ToLower().Contains("aidan not cute"))
+                if (e.Message.Content.ToLower().Contains("aidan not cute"))
                 {
                     await e.Message.DeleteAsync();
                     await e.Channel.SendMessageAsync("incorrect, " + e.Author.Mention);
                 }
-                else if (e.Channel.Id.Equals(723174937619070976) && e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
+                else if (e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
                 {
-                    //await e.Message.DeleteAsync();
+                    await e.Message.DeleteAsync();
                 }
             }
+
+            if (!(e.Guild == null) && e.Author.Id.Equals(291665243992752141) && e.Guild.Id.ToString() == "302869055746998275" && Settings.Default.IsHarisATwat)
+            {
+                await e.Message.DeleteAsync();
+            }
+
         }
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)

@@ -37,12 +37,13 @@ namespace Void_Bot {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::DSharpPlus.Entities.DiscordActivity Status {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsStatus {
             get {
-                return ((global::DSharpPlus.Entities.DiscordActivity)(this["Status"]));
+                return ((bool)(this["IsStatus"]));
             }
             set {
-                this["Status"] = value;
+                this["IsStatus"] = value;
             }
         }
     }
