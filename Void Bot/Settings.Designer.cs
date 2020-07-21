@@ -34,17 +34,5 @@ namespace Void_Bot {
                 this["IsHarisATwat"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsStatus {
-            get {
-                return ((bool)(this["IsStatus"]));
-            }
-            set {
-                this["IsStatus"] = value;
-            }
-        }
     }
 }

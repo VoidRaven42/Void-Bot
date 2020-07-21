@@ -221,8 +221,8 @@ namespace Void_Bot
                     case "":
                     case "remove":
                     case "none":
-                        Settings.Default.IsStatus = false;
-                        Settings.Default.Save();
+
+                        Program.customstatus = false;
                         await Program.discord.UpdateStatusAsync();
                         return;
                 }
@@ -260,8 +260,7 @@ namespace Void_Bot
                         await ctx.RespondAsync("Invalid activity specified");
                         return;
                 }
-                Settings.Default.IsStatus = true;
-                Settings.Default.Save();
+                Program.customstatus = true;
                 await Program.discord.UpdateStatusAsync(activity);
             }
             else

@@ -25,6 +25,8 @@ namespace Void_Bot
 
         private static InteractivityExtension interactivity;
 
+        public static bool customstatus = false;
+
         public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
@@ -70,7 +72,7 @@ namespace Void_Bot
             await Task.Delay(2000);
             while (true)
             {
-                if (!Settings.Default.IsStatus)
+                if (!customstatus)
                 {
                     var amount = 0;
 
@@ -84,9 +86,9 @@ namespace Void_Bot
                     await discord.UpdateStatusAsync(activity);
                 }
 
-                await Task.Delay(/*TimeSpan.FromMinutes(1)*/10000);
+                await Task.Delay(TimeSpan.FromMinutes(1));
 
-                if (!Settings.Default.IsStatus)
+                if (!customstatus)
                 {
                     var amount = discord.Guilds.Count;
 
@@ -95,7 +97,7 @@ namespace Void_Bot
                     await discord.UpdateStatusAsync(activity);
                 }
 
-                await Task.Delay(/*TimeSpan.FromMinutes(1)*/10000);
+                await Task.Delay(TimeSpan.FromMinutes(1));
             }
         }
 
@@ -136,7 +138,7 @@ namespace Void_Bot
                 await e.Context.RespondAsync("Command Help:");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
-            else if (!(ex is ArgumentException))
+            else if (!(ex is ArgumentException) && !ex.Message.Equals("Specified command was not found."))
             {
                 embed = !(ex is ChecksFailedException)
                     ? new DiscordEmbedBuilder
@@ -152,6 +154,11 @@ namespace Void_Bot
                         Description = "You lack permissions necessary to run this command.",
                         Color = new DiscordColor(16711680)
                     };
+            }
+            else if (ex.Message.Equals("Specified command was not found."))
+            {
+                await e.Context.RespondAsync("Specified command was not found.\nCommand Help:");
+                await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context);
             }
             else
             {
