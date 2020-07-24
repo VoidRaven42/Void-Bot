@@ -299,6 +299,10 @@ namespace Void_Bot
             Settings.Default.Save();
             await ctx.RespondAsync("Haris is no longer being suppressed");
         }
+        public async Task Test(CommandContext ctx)
+        {
+            
+        }
         public class Globals
         {
             public DiscordClient client;
