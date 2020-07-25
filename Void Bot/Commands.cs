@@ -362,13 +362,13 @@ namespace Void_Bot
             for (var i = 0; i < 1000; i++)
             {
                 img = hot[random.Next(0, 99)];
-                if (!img.Listing.URL.Contains("gifv"))
+                if (!img.Listing.URL.Contains("gifv") && img.Listing.URL.Contains("i.redd.it"))
                 {
                     break;
                 }
             }
 
-            if (img.Listing.URL.Contains("gifv"))
+            if (img.Listing.URL.Contains("gifv") || !img.Listing.URL.Contains("i.redd.it"))
             {
                 await ctx.RespondAsync("No valid post could be found, please try again.");
                 return;
