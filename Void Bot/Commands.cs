@@ -13,6 +13,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Newtonsoft.Json.Linq;
 using Reddit;
+using Reddit.Things;
+using Post = Reddit.Controllers.Post;
 
 namespace Void_Bot
 {
@@ -353,17 +355,31 @@ namespace Void_Bot
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
             var refresh = File.ReadAllText("refresh.txt");
-            var reddit = new RedditClient(appId: "Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
+            var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
             var sub = reddit.Subreddit("eyebleach").About();
-            var top = sub.Posts.Hot[random.Next(0, 99)];
+            var hot = sub.Posts.Hot;
+            Post img = null;
+            for (var i = 0; i < 1000; i++)
+            {
+                img = hot[random.Next(0, 99)];
+                if (!img.Listing.URL.Contains("gifv"))
+                {
+                    break;
+                }
+            }
 
-            var Embed = new DiscordEmbedBuilder
+            if (img.Listing.URL.Contains("gifv"))
+            {
+                await ctx.RespondAsync("No valid post could be found, please try again.");
+                return;
+            }
+            var embed = new DiscordEmbedBuilder
             {
                 Title = "Post Retrieved",
                 Color = DiscordColor.Aquamarine,
-                ImageUrl = top.Listing.URL
+                ImageUrl = img.Listing.URL
             };
-            await ctx.RespondAsync(embed: Embed);
+            await ctx.RespondAsync(embed: embed);
         }
     }
 }
