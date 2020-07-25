@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
@@ -13,8 +14,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Newtonsoft.Json.Linq;
 using Reddit;
-using Reddit.Things;
-using Post = Reddit.Controllers.Post;
+using Reddit.Controllers;
 
 namespace Void_Bot
 {
@@ -109,6 +109,7 @@ namespace Void_Bot
             if (usertrim.All(char.IsDigit))
             {
                 user = await Program.discord.GetUserAsync(ulong.Parse(usertrim));
+
                 var interactivity = ctx.Client.GetInteractivity();
                 var random = new Random();
                 decimal arg1 = random.Next(5, 20);
@@ -349,7 +350,6 @@ namespace Void_Bot
 
         [Command("eyebleach")]
         [Aliases("eb")]
-
         public async Task Eyebleach(CommandContext ctx)
         {
             var random = new Random();
@@ -362,10 +362,7 @@ namespace Void_Bot
             for (var i = 0; i < 1000; i++)
             {
                 img = hot[random.Next(0, 99)];
-                if (!img.Listing.URL.Contains("gifv") && img.Listing.URL.Contains("i.redd.it"))
-                {
-                    break;
-                }
+                if (!img.Listing.URL.Contains("gifv") && img.Listing.URL.Contains("i.redd.it")) break;
             }
 
             if (img.Listing.URL.Contains("gifv") || !img.Listing.URL.Contains("i.redd.it"))
@@ -373,11 +370,27 @@ namespace Void_Bot
                 await ctx.RespondAsync("No valid post could be found, please try again.");
                 return;
             }
+
             var embed = new DiscordEmbedBuilder
             {
                 Title = "Post Retrieved",
                 Color = DiscordColor.Aquamarine,
                 ImageUrl = img.Listing.URL
+            };
+            await ctx.RespondAsync(embed: embed);
+        }
+
+        [Command("avatar")]
+        [Aliases("pfp")]
+        [Description("Takes the user's id (developer mode needed) and returns the pfp in high quality.")]
+        public async Task Avatar(CommandContext ctx, ulong id)
+        {
+            var usr = await Program.discord.GetUserAsync(id);
+            var embed = new DiscordEmbedBuilder
+            {
+                Title = "User Avatar",
+                Color = DiscordColor.Magenta,
+                ImageUrl = usr.AvatarUrl
             };
             await ctx.RespondAsync(embed: embed);
         }

@@ -301,7 +301,6 @@ namespace Void_Bot
         }
         public async Task Test(CommandContext ctx)
         {
-            
         }
         public class Globals
         {
