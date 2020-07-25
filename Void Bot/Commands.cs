@@ -12,6 +12,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Newtonsoft.Json.Linq;
+using Reddit;
 
 namespace Void_Bot
 {
@@ -341,6 +342,28 @@ namespace Void_Bot
             return !(jo[rand]["type"]!.ToString() == "image")
                 ? jo[rand]["preview_url"]!.ToString()
                 : jo[rand]["file_url"]!.ToString();
+        }
+
+
+        [Command("eyebleach")]
+        [Aliases("eb")]
+
+        public async Task Eyebleach(CommandContext ctx)
+        {
+            var random = new Random();
+            var rtoken = File.ReadAllText("reddittoken.txt");
+            var refresh = File.ReadAllText("refresh.txt");
+            var access = File.ReadAllText("access.txt");
+            var reddit = new RedditClient(appId: "Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh, accessToken: access);
+            var sub = reddit.Subreddit("eyebleach").About();
+            var top = sub.Posts.Hot[random.Next(0, 99)];
+            var Embed = new DiscordEmbedBuilder
+            {
+                Title = "Post Retrieved",
+                Color = DiscordColor.Aquamarine,
+                ImageUrl = top.Listing.URL
+            };
+            await ctx.RespondAsync(embed: Embed);
         }
     }
 }

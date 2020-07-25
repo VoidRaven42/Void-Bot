@@ -17,7 +17,8 @@
     <PackageReference Include="DSharpPlus.Rest" Version="4.0.0-nightly-00709" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.7.0-4.final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.7.0-4.final" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0-preview.6.20305.6" />
+    <PackageReference Include="Reddit" Version="1.4.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0-preview.7.20364.11" />
   </ItemGroup>
 
   <ItemGroup>
