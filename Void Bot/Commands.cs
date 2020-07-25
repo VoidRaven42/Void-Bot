@@ -353,10 +353,10 @@ namespace Void_Bot
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
             var refresh = File.ReadAllText("refresh.txt");
-            var access = File.ReadAllText("access.txt");
-            var reddit = new RedditClient(appId: "Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh, accessToken: access);
+            var reddit = new RedditClient(appId: "Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
             var sub = reddit.Subreddit("eyebleach").About();
             var top = sub.Posts.Hot[random.Next(0, 99)];
+
             var Embed = new DiscordEmbedBuilder
             {
                 Title = "Post Retrieved",
