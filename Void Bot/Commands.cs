@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.AccessControl;
 using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
@@ -229,7 +230,7 @@ namespace Void_Bot
                     Color = DiscordColor.Aquamarine,
                     ImageUrl = e
                 };
-                Embed.AddField("Requested by:", ctx.User.Username + ctx.User.Discriminator);
+                Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                 await ctx.RespondAsync(null, false, Embed);
             }
         }
@@ -239,6 +240,8 @@ namespace Void_Bot
         [Hidden]
         public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
+            await ctx.RespondAsync("This command is currently down, it may be days before it is back up");
+            return;
             if (!ctx.Channel.IsNSFW)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
@@ -274,7 +277,7 @@ namespace Void_Bot
                     Color = DiscordColor.Aquamarine,
                     ImageUrl = e
                 };
-                Embed.AddField("Requested by:", ctx.User.Username + ctx.User.Discriminator);
+                Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                 await ctx.RespondAsync(null, false, Embed);
             }
         }
@@ -287,7 +290,7 @@ namespace Void_Bot
                 var tagstring = "";
                 foreach (var elem in tags) tagstring = tagstring + elem + "+";
                 URI = URI + "?tags=" + tagstring + "order:score";
-                URI += "&limit=100";
+                URI += "&limit=200";
             }
 
             client.Headers.Add("user-agent", "PostmanRuntime/7.25.0");
@@ -298,7 +301,7 @@ namespace Void_Bot
             streamReader.Close();
             var jo = JObject.Parse(s);
             var random = new Random();
-            if (jo.Count == 0) return null;
+            if (!jo["posts"].Any()) return null;
             var img = "";
             for (var i = 0; i < 1000; i++)
             {
@@ -383,9 +386,8 @@ namespace Void_Bot
         [Command("avatar")]
         [Aliases("pfp")]
         [Description("Takes the user's id (developer mode needed) and returns the pfp in high quality.")]
-        public async Task Avatar(CommandContext ctx, ulong id)
+        public async Task Avatar(CommandContext ctx, DiscordUser usr)
         {
-            var usr = await Program.discord.GetUserAsync(id);
             var embed = new DiscordEmbedBuilder
             {
                 Title = "User Avatar",
@@ -394,5 +396,13 @@ namespace Void_Bot
             };
             await ctx.RespondAsync(embed: embed);
         }
+
+        [Command("knuckles")]
+
+        public async Task Knuckles()
+        {
+
+        }
+
     }
 }

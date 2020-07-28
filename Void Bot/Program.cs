@@ -116,7 +116,7 @@ namespace Void_Bot
                 }
             }
 
-            if (!(e.Guild == null) && e.Author.Id.Equals(291665243992752141) && e.Guild.Id.ToString() == "302869055746998275" && Settings.Default.IsHarisATwat)
+            if (!(e.Guild == null) && (e.Author.Id.Equals(291665243992752141) || e.Author.Id.Equals(264462171528757250)) && e.Guild.Id.ToString() == "302869055746998275" && Settings.Default.IsHarisATwat)
             {
                 await e.Message.DeleteAsync();
             }

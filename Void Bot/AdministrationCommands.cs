@@ -269,38 +269,41 @@ namespace Void_Bot
             }
         }
 
-        [Command("shutupharis")]
+        [Command("shutupnomiki")]
         [RequirePermissions(Permissions.ManageMessages)]
         [Hidden]
         public async Task Shutup(CommandContext ctx)
         {
             if (!ctx.Guild.Members.ContainsKey(291665243992752141))
             {
-                await ctx.RespondAsync("Haris is not here");
+                await ctx.RespondAsync("The nomiki are not here");
                 return;
             }
 
             Settings.Default.IsHarisATwat = true;
             Settings.Default.Save();
-            await ctx.RespondAsync("Haris is now being suppressed");
+            await ctx.RespondAsync("The nomiki are is now being suppressed");
         }
 
-        [Command("unshutupharis")]
+        [Command("unshutupnomiki")]
         [RequirePermissions(Permissions.ManageMessages)]
         [Hidden]
         public async Task UnShutup(CommandContext ctx)
         {
-            if (!ctx.Guild.Members.ContainsKey(291665243992752141))
+            if (!ctx.Guild.Members.ContainsKey(291665243992752141) && !ctx.Guild.Members.ContainsKey(264462171528757250))
             {
-                await ctx.RespondAsync("Haris is not here");
+                await ctx.RespondAsync("The nomiki are not here");
                 return;
             }
             Settings.Default.IsHarisATwat = false;
             Settings.Default.Save();
-            await ctx.RespondAsync("Haris is no longer being suppressed");
+            await ctx.RespondAsync("The nomiki are no longer being suppressed");
         }
+
+        [Command("test")]
         public async Task Test(CommandContext ctx)
         {
+            
         }
         public class Globals
         {
