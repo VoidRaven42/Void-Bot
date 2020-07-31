@@ -50,7 +50,7 @@ namespace Void_Bot
                 UseInternalLogHandler = true,
                 LogLevel = LogLevel.Info
             });
-            
+
             var icfg = new InteractivityConfiguration
             {
                 Timeout = TimeSpan.FromSeconds(20.0)
@@ -76,13 +76,10 @@ namespace Void_Bot
                 {
                     var amount = 0;
 
-                    foreach (var elem in discord.Guilds)
-                    {
-                        amount += elem.Value.Members.Count;
-                    }
+                    foreach (var elem in discord.Guilds) amount += elem.Value.Members.Count;
 
                     var status = amount + " users";
-                    DiscordActivity activity = new DiscordActivity(status, ActivityType.Watching);
+                    var activity = new DiscordActivity(status, ActivityType.Watching);
                     await discord.UpdateStatusAsync(activity);
                 }
 
@@ -93,7 +90,7 @@ namespace Void_Bot
                     var amount = discord.Guilds.Count;
 
                     var status = amount + " servers";
-                    DiscordActivity activity = new DiscordActivity(status, ActivityType.Watching);
+                    var activity = new DiscordActivity(status, ActivityType.Watching);
                     await discord.UpdateStatusAsync(activity);
                 }
 
@@ -116,11 +113,10 @@ namespace Void_Bot
                 }
             }
 
-            if (!(e.Guild == null) && (e.Author.Id.Equals(291665243992752141) || e.Author.Id.Equals(264462171528757250)) && e.Guild.Id.ToString() == "302869055746998275" && Settings.Default.IsHarisATwat)
-            {
-                await e.Message.DeleteAsync();
-            }
-
+            if (!(e.Guild == null) &&
+                (e.Author.Id.Equals(291665243992752141) || e.Author.Id.Equals(264462171528757250)) &&
+                e.Guild.Id.ToString() == "302869055746998275" &&
+                Settings.Default.IsHarisATwat) await e.Message.DeleteAsync();
         }
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)

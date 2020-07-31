@@ -38,7 +38,8 @@ namespace Void_Bot
                     Color = new DiscordColor(13668786)
                 };
                 var msg = await ctx.RespondAsync("", false, embed.Build());
-                var sopts = ScriptOptions.Default.AddImports("System", "System.Collections.Generic", "System.Diagnostics",
+                var sopts = ScriptOptions.Default.AddImports("System", "System.Collections.Generic",
+                    "System.Diagnostics", "System.IO",
                     "System.Linq", "System.Net.Http", "System.Net.Http.Headers", "System.Reflection", "System.Text",
                     "System.Threading", "System.Threading.Tasks", "DSharpPlus", "DSharpPlus.CommandsNext",
                     "DSharpPlus.Entities", "DSharpPlus.EventArgs", "DSharpPlus.Exceptions", "Void_Bot").AddReferences(
@@ -84,7 +85,8 @@ namespace Void_Bot
                         user = ctx.User,
                         client = Program.discord,
                         guild = ctx.Guild,
-                        member = ctx.Member
+                        member = ctx.Member,
+                        channel = ctx.Channel
                     });
                     rex = css.Exception;
                 }
@@ -114,13 +116,14 @@ namespace Void_Bot
                     embed.AddField("Result", css.ReturnValue != null ? css.ReturnValue.ToString() : "No value returned")
                         .AddField("Compilation time", sw1.ElapsedMilliseconds.ToString("#,##0") + "ms", true)
                         .AddField("Execution time", sw2.ElapsedMilliseconds.ToString("#,##0") + "ms", true);
-                    if (css.ReturnValue != null) embed.AddField("Return type", css.ReturnValue.GetType().ToString(), true);
+                    if (css.ReturnValue != null)
+                        embed.AddField("Return type", css.ReturnValue.GetType().ToString(), true);
                     await msg.ModifyAsync(default, embed.Build());
                 }
             }
             else
             {
-                await ctx.RespondAsync("Restricted to bot creator");
+                await ctx.RespondAsync("Restricted command");
             }
         }
 
@@ -227,16 +230,19 @@ namespace Void_Bot
                         return;
                 }
 
+                if (status == null)
+                {
+                    await ctx.RespondAsync("Please enter a valid activity and status");
+                    return;
+                }
+
                 if (status.ToLower() == "users")
                 {
                     var amount = 0;
                     var client = Program.discord;
-                    foreach (var elem in client.Guilds)
-                    {
-                        amount += elem.Value.Members.Count;
-                    }
+                    foreach (var elem in client.Guilds) amount += elem.Value.Members.Count;
 
-                    status = amount.ToString() + " users";
+                    status = amount + " users";
                 }
 
                 new DiscordActivity();
@@ -260,8 +266,10 @@ namespace Void_Bot
                         await ctx.RespondAsync("Invalid activity specified");
                         return;
                 }
+
                 Program.customstatus = true;
                 await Program.discord.UpdateStatusAsync(activity);
+                await ctx.RespondAsync("Status has been successfully updated");
             }
             else
             {
@@ -274,7 +282,8 @@ namespace Void_Bot
         [Hidden]
         public async Task Shutup(CommandContext ctx)
         {
-            if (!ctx.Guild.Members.ContainsKey(291665243992752141))
+            if (!ctx.Guild.Members.ContainsKey(291665243992752141) &&
+                !ctx.Guild.Members.ContainsKey(264462171528757250))
             {
                 await ctx.RespondAsync("The nomiki are not here");
                 return;
@@ -290,23 +299,25 @@ namespace Void_Bot
         [Hidden]
         public async Task UnShutup(CommandContext ctx)
         {
-            if (!ctx.Guild.Members.ContainsKey(291665243992752141) && !ctx.Guild.Members.ContainsKey(264462171528757250))
+            if (!ctx.Guild.Members.ContainsKey(291665243992752141) &&
+                !ctx.Guild.Members.ContainsKey(264462171528757250))
             {
                 await ctx.RespondAsync("The nomiki are not here");
                 return;
             }
+
             Settings.Default.IsHarisATwat = false;
             Settings.Default.Save();
             await ctx.RespondAsync("The nomiki are no longer being suppressed");
         }
 
-        [Command("test")]
         public async Task Test(CommandContext ctx)
         {
-            
         }
+
         public class Globals
         {
+            public DiscordChannel channel;
             public DiscordClient client;
 
             public CommandContext context;
