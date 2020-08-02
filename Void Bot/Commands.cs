@@ -29,6 +29,9 @@ namespace Void_Bot
 
         public string[] RedditArray = new string[20];
         public int RedditElem;
+        
+        public string[] EBArray = new string[20];
+        public int EBElem;
 
         [Command("math")]
         [Aliases("maths")]
@@ -405,6 +408,9 @@ namespace Void_Bot
                 ImageUrl = img.Listing.URL
             };
             await msg.ModifyAsync(embed: embed.Build());
+                EBArray[E6Elem] = e;
+                EBElem += 1;
+                if (EBElem == 20) EBElem = 0;
         }
 
         [Command("avatar")]
