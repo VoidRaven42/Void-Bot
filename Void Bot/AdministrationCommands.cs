@@ -310,6 +310,10 @@ namespace Void_Bot
             Settings.Default.Save();
             await ctx.RespondAsync("The nomiki are no longer being suppressed");
         }
+        
+        [Command("embed")]
+        [Aliases("sendembed")]
+        public async Task Embed(CommandContext ctx, )
 
         public async Task Test(CommandContext ctx)
         {
