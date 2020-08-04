@@ -152,6 +152,7 @@ namespace Void_Bot
 
         [Command("purge")]
         [Aliases("clear")]
+        [Description("Clears messages, up to 100 at a time")]
         [RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeAsync(CommandContext ctx, [Description("The amount of messages to purge")]
             int amount)
@@ -184,6 +185,7 @@ namespace Void_Bot
 
         [Command("send")]
         [Aliases("sendmessage", "botsend")]
+        [Description("Sends a normal message in a channel, can be used for announcements")]
         [RequirePermissions(Permissions.ManageMessages)]
         public async Task SendAsBot(CommandContext ctx, DiscordChannel channel, [RemainingText] string messagetosend)
         {

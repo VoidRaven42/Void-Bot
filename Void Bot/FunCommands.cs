@@ -14,12 +14,13 @@ namespace Void_Bot
     {
         [Command("mathduel")]
         [Aliases("duel", "mathsduel")]
+        [Description("Challenges another user to a math duel!")]
         public async Task Duel(CommandContext ctx, [RemainingText] string userintake)
         {
             if (userintake == null)
             {
-                await ctx.RespondAsync("Command Help:");
-                await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(ctx, ctx.Command.Name);
+                await ctx.RespondAsync("You must specify a user to duel!");
+                return;
             }
 
             if (userintake.Contains(' ') || userintake.Contains(','))
@@ -121,6 +122,7 @@ namespace Void_Bot
 
         [Command("speen")]
         [Aliases("spin")]
+        [Description("SPEEN")]
         public async Task Speen(CommandContext ctx)
         {
             await ctx.RespondWithFileAsync("speen.mp4");
@@ -128,12 +130,14 @@ namespace Void_Bot
 
         [Command("gun")]
         [Aliases("gunsong")]
+        [Description("gun.")]
         public async Task Gun(CommandContext ctx)
         {
             await ctx.RespondWithFileAsync("gun.mp4");
         }
 
         [Command("no")]
+        [Description("no.")]
         public async Task No(CommandContext ctx)
         {
             await ctx.RespondWithFileAsync("no.mp4");
@@ -141,6 +145,7 @@ namespace Void_Bot
 
         [Command("loaf")]
         [Aliases("bunny")]
+        [Description("sends BUNNI!")]
         public async Task Loaf(CommandContext ctx)
         {
             await ctx.RespondAsync(
@@ -148,18 +153,22 @@ namespace Void_Bot
         }
 
         [Command("knuckles")]
+        [Description("you don't want to use this command")]
         public async Task Knuckles(CommandContext ctx)
         {
             await ctx.RespondAsync("https://cdn.discordapp.com/emojis/595433217440350248.gif");
         }
 
         [Command("horny")]
+        [Aliases("bonk")]
+        [Description("bonk.")]
         public async Task Horny(CommandContext ctx)
         {
             await ctx.RespondAsync("https://tenor.com/view/horny-jail-bonk-dog-hit-head-stop-being-horny-gif-17298755");
         }
 
         [Command("gitgud")]
+        [Description("git gud!")]
         public async Task Gitgud(CommandContext ctx)
         {
             await ctx.RespondAsync(
@@ -167,6 +176,7 @@ namespace Void_Bot
         }
 
         [Command("turnofflifesupport")]
+        [Description("rip grandma")]
         public async Task LifeSupport(CommandContext ctx)
         {
             await ctx.RespondAsync("Grandma has been terminated.");
