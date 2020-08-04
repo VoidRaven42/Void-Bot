@@ -1,5 +1,3 @@
-// Void_Bot.Program
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -63,8 +61,10 @@ namespace Void_Bot
                 EnableDms = false,
                 EnableMentionPrefix = false
             });
-            commands.RegisterCommands<Commands>();
+            commands.RegisterCommands<UtilityCommands>();
             commands.RegisterCommands<AdministrationCommands>();
+            commands.RegisterCommands<FunCommands>();
+            commands.RegisterCommands<ExternalCommands>();
             commands.CommandErrored += Commands_CommandErrored;
             commands.CommandExecuted += Commands_CommandExecuted;
             discord.MessageCreated += Discord_MessageCreated;
@@ -132,6 +132,10 @@ namespace Void_Bot
             if (ex is ArgumentException && e.Context.RawArgumentString == "")
             {
                 await e.Context.RespondAsync("Command Help:");
+                await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
+            }
+            else if (ex is InvalidOperationException)
+            {
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
             else if (!(ex is ArgumentException) && !ex.Message.Equals("Specified command was not found."))

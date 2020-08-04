@@ -1,5 +1,3 @@
-// Void_Bot.AdministrationCommands
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,15 +15,12 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace Void_Bot
 {
+    [Group("admin")]
+    [Description("Commands for moderating servers")]
     public class AdministrationCommands : BaseCommandModule
     {
-        [Command("turnofflifesupport")]
-        public async Task LifeSupport(CommandContext ctx)
-        {
-            await ctx.RespondAsync("Grandma has been terminated.");
-        }
-
         [Command("eval")]
+        [Hidden]
         public async Task Eval(CommandContext ctx, [RemainingText] [Description("Code to evaluate.")]
             string code)
         {
@@ -168,22 +163,18 @@ namespace Void_Bot
             }
 
             await ctx.Channel.DeleteMessageAsync(ctx.Message);
-            if ((amount - amount % 100) / 100 < 1)
+            if ((amount - amount % 100) / 100 <= 1)
             {
                 var messages = await ctx.Channel.GetMessagesAsync(amount);
                 await ctx.Channel.DeleteMessagesAsync(messages);
             }
             else
             {
-                for (var i = 0; i < (amount - amount % 100) / 100; i++)
-                {
-                    var messages = await ctx.Channel.GetMessagesAsync();
-                    if (messages.Count < 100) break;
-                    await ctx.Channel.DeleteMessagesAsync(messages);
-                    Thread.Sleep(5000);
-                    messages = await ctx.Channel.GetMessagesAsync();
-                    await ctx.Channel.DeleteMessagesAsync(messages);
-                }
+                await ctx.RespondAsync("Cannot purge more than 100 messages!");
+                //for (var i = 0; i < (amount - amount % 100) / 100; i++)
+                //{
+                //    if ()
+                //}
             }
 
             var obj = await ctx.Channel.SendMessageAsync($"{amount} messages have been deleted!");
@@ -310,10 +301,13 @@ namespace Void_Bot
             Settings.Default.Save();
             await ctx.RespondAsync("The nomiki are no longer being suppressed");
         }
-        
-        [Command("embed")]
+
+        /*[Command("embed")]
         [Aliases("sendembed")]
-        public async Task Embed(CommandContext ctx, )
+        [RequirePermissions(Permissions.ManageMessages)]*/
+        public async Task Embed(CommandContext ctx, [RemainingText] string data)
+        {
+        }
 
         public async Task Test(CommandContext ctx)
         {
@@ -322,6 +316,7 @@ namespace Void_Bot
         public class Globals
         {
             public DiscordChannel channel;
+
             public DiscordClient client;
 
             public CommandContext context;
