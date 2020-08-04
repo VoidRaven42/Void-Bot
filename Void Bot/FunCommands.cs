@@ -9,6 +9,7 @@ using DSharpPlus.Interactivity;
 namespace Void_Bot
 {
     [Group("fun")]
+    [Aliases("f")]
     [Description("A group of fun commands")]
     internal class FunCommands : BaseCommandModule
     {

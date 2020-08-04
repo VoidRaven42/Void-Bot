@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 namespace Void_Bot
 {
     [Group("utility")]
+    [Aliases("u", "util")]
     [Description("Commands that do useful stuff")]
     public class UtilityCommands : BaseCommandModule
     {

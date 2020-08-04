@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.Scripting;
 namespace Void_Bot
 {
     [Group("admin")]
+    [Aliases("a")]
     [Description("Commands for moderating servers")]
     public class AdministrationCommands : BaseCommandModule
     {

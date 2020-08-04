@@ -15,6 +15,7 @@ using Reddit.Controllers;
 namespace Void_Bot
 {
     [Group("external")]
+    [Aliases("e", "ex")]
     [Description("Commands that get posts from external websites")]
     internal class ExternalCommands : BaseCommandModule
     {
