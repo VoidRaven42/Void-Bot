@@ -215,11 +215,9 @@ namespace Void_Bot
 
         [Command("rule34")]
         [Aliases("r34")]
-        [Hidden]
+        [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
-            await ctx.RespondAsync("This command is currently down, it may be days before it is back up");
-            return;
             if (!ctx.Channel.IsNSFW)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
@@ -233,30 +231,37 @@ namespace Void_Bot
                 return;
             }
 
+            var Embed = new DiscordEmbedBuilder
+            {
+                Title = "Retrieving Post",
+                Color = DiscordColor.Yellow
+            };
+            var msg = await ctx.RespondAsync(embed: Embed.Build());
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
             var e = await RHttpGet("https://r34-json-api.herokuapp.com/posts", tagssplit.ToArray());
             if (e == null)
             {
-                var message = await ctx.RespondAsync("No results found!");
-                Thread.Sleep(1000);
-                IReadOnlyList<DiscordMessage> messages = new DiscordMessage[2]
+                Embed = new DiscordEmbedBuilder
                 {
-                    ctx.Message,
-                    message
+                    Title = "No results found!",
+                    Color = DiscordColor.Red
                 };
-                await ctx.Channel.DeleteMessagesAsync(messages);
+                await msg.ModifyAsync(embed: Embed.Build());
             }
             else
             {
-                var Embed = new DiscordEmbedBuilder
+                Embed = new DiscordEmbedBuilder
                 {
                     Title = "Post Retrieved",
                     Color = DiscordColor.Aquamarine,
                     ImageUrl = e
                 };
                 Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
-                await ctx.RespondAsync(null, false, Embed);
+                await msg.ModifyAsync(embed: Embed.Build());
+                R34Array[R34Elem] = e;
+                R34Elem += 1;
+                if (R34Elem == 20) R34Elem = 0;
             }
         }
 

@@ -115,8 +115,6 @@ namespace Void_Bot
                 {
                     if (!e.Message.Content.ToLower().Contains(elem)) continue;
                     await e.Message.DeleteAsync();
-                    await Task.Delay(new Random().Next(1000, 3000));
-                    await e.Channel.SendMessageAsync($"Incorrect, {e.Message.Author.Mention}");
                 }
 
                 if (e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
@@ -199,6 +197,7 @@ namespace Void_Bot
             await e.Guild.SystemChannel.SendMessageAsync(null, false, Embed);
         }
 
+        //private static async Task 
         private static void OnProcessExit(object sender, EventArgs e)
         {
             Console.WriteLine("Disconnecting, then exiting in 2 seconds");
