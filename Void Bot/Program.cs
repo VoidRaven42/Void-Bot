@@ -25,6 +25,14 @@ namespace Void_Bot
 
         public static bool customstatus = false;
 
+        private static readonly List<string> bannedwords = new List<string>
+        {
+            "aidan  not cute", "aidan not cute", "a idan not cute", "aidan no t cute", "aiidan not cute",
+            "aaiidaan not cuute", "aidan ulge", "aidan not cu te", "aidan ugle", "aidan n o t cute",
+            "aidan is not cute", "aidanugly", "aidan ugly", "ai dan not cute", "aidan is uncute", "aidann not cute",
+            "aidan is ugle", "a i d a n  n o t  c u t e"
+        };
+
         public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
@@ -61,6 +69,7 @@ namespace Void_Bot
                 EnableDms = false,
                 EnableMentionPrefix = false
             });
+            commands.RegisterCommands<Commands>();
             commands.RegisterCommands<UtilityCommands>();
             commands.RegisterCommands<AdministrationCommands>();
             commands.RegisterCommands<FunCommands>();
@@ -100,17 +109,18 @@ namespace Void_Bot
 
         private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
         {
-            if (!(e.Guild == null) && e.Guild.Id.ToString() == "642067509931147264" && !e.Author.IsBot)
+            if (!(e.Guild == null) && e.Guild.Id.ToString() == "642067509931147264")
             {
-                if (e.Message.Content.ToLower().Contains("aidan not cute"))
+                foreach (var elem in bannedwords)
                 {
+                    if (!e.Message.Content.ToLower().Contains(elem)) continue;
                     await e.Message.DeleteAsync();
-                    await e.Channel.SendMessageAsync("incorrect, " + e.Author.Mention);
+                    await Task.Delay(new Random().Next(1000, 3000));
+                    await e.Channel.SendMessageAsync($"Incorrect, {e.Message.Author.Mention}");
                 }
-                else if (e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
-                {
+
+                if (e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
                     await e.Message.DeleteAsync();
-                }
             }
 
             if (!(e.Guild == null) &&

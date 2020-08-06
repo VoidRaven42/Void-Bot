@@ -182,5 +182,13 @@ namespace Void_Bot
         {
             await ctx.RespondAsync("Grandma has been terminated.");
         }
+
+        [Command("nonce")]
+        [Description("nonce!")]
+        public async Task Nonce(CommandContext ctx)
+        {
+            await ctx.RespondAsync(
+                "https://tenor.com/view/nonce-pedo-loop-itz_cam-gif-16228867");
+        }
     }
 }
