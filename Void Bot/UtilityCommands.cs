@@ -64,6 +64,7 @@ namespace Void_Bot
                 one = BigInteger.Parse(array[0]);
                 two = BigInteger.Parse(array[1]);
             }
+
             switch (type)
             {
                 case "+":

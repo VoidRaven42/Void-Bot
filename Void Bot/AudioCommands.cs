@@ -1,21 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
-using DSharpPlus.Net;
-using DSharpPlus.Net.Serialization;
 
 namespace Void_Bot
 {
     [Group("audio")]
     [Aliases("au")]
-    class AudioCommands : BaseCommandModule
+    internal class AudioCommands : BaseCommandModule
     {
         [Command("join")]
         [Aliases("connect")]
@@ -76,14 +70,12 @@ namespace Void_Bot
             var node = Program.LavalinkNode;
             var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
 
-            if (conn == null)
-            {
-                await Join(ctx);
-            }
+            if (conn == null) await Join(ctx);
             conn = node.GetConnection(ctx.Guild);
             var loadResult = await node.Rest.GetTracksAsync(search);
 
-            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed ||
+                loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
             {
                 await ctx.RespondAsync($"Track search failed for {search}.");
                 await Leave(ctx);
@@ -100,10 +92,7 @@ namespace Void_Bot
         private async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
-            if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected)
-            {
-                return;
-            }
+            if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
             try
             {
                 await e.Player.DisconnectAsync();

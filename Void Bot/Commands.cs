@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,23 +12,21 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Lavalink;
+using DSharpPlus.Lavalink.EventArgs;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Reddit;
 using Reddit.Controllers;
-using System.Management;
-using DSharpPlus.Lavalink;
-using DSharpPlus.Lavalink.EventArgs;
 
 //This file is here to allow easier use of commands, while allowing the help command to remain organised
 
 namespace Void_Bot
 {
-    class Commands : BaseCommandModule
+    internal class Commands : BaseCommandModule
     {
-
-        private ExternalCommands ex = new ExternalCommands();
+        private readonly ExternalCommands ex = new ExternalCommands();
 
         [Command("math")]
         [Aliases("maths")]
@@ -41,7 +40,7 @@ namespace Void_Bot
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(ctx, ctx.Command.Name);
                 return;
             }
-            
+
             string type;
             BigInteger one;
             BigInteger two;
@@ -81,6 +80,7 @@ namespace Void_Bot
                 one = BigInteger.Parse(array[0]);
                 two = BigInteger.Parse(array[1]);
             }
+
             switch (type)
             {
                 case "+":
@@ -241,8 +241,8 @@ namespace Void_Bot
             {
                 var toremove = ctx.Guild.Id + ":" + guildprefixes[ctx.Guild.Id.ToString()];
                 File.WriteAllLines("prefixes.txt", (from l in File.ReadLines("prefixes.txt")
-                                                    where l != toremove
-                                                    select l).ToList());
+                    where l != toremove
+                    select l).ToList());
             }
 
             await File.AppendAllTextAsync("prefixes.txt", ctx.Guild.Id + ":" + prefix + Environment.NewLine);
@@ -853,12 +853,11 @@ namespace Void_Bot
         //[Command("cputemp")]
         public async Task CPUTemp(CommandContext ctx)
         {
-            Double CPUtprt = 0;
-            System.Management.ManagementObjectSearcher mos = new System.Management.ManagementObjectSearcher(@"root\WMI", "Select * From MSAcpi_ThermalZoneTemperature");
-            foreach (System.Management.ManagementObject mo in mos.Get())
-            {
-                CPUtprt = Convert.ToDouble(Convert.ToDouble(mo.GetPropertyValue("CurrentTemperature").ToString()) - 2732) / 10;
-            }
+            double CPUtprt = 0;
+            var mos = new ManagementObjectSearcher(@"root\WMI", "Select * From MSAcpi_ThermalZoneTemperature");
+            foreach (ManagementObject mo in mos.Get())
+                CPUtprt = Convert.ToDouble(
+                    Convert.ToDouble(mo.GetPropertyValue("CurrentTemperature").ToString()) - 2732) / 10;
 
             await ctx.RespondAsync(CPUtprt.ToString());
         }
@@ -926,20 +925,18 @@ namespace Void_Bot
             var node = Program.LavalinkNode;
             var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
 
-            if (conn == null)
-            {
-                await Join(ctx);
-            }
+            if (conn == null) await Join(ctx);
             conn = node.GetConnection(ctx.Guild);
             var loadResult = await node.Rest.GetTracksAsync(search);
 
-            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed ||
+                loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
             {
                 await ctx.RespondAsync($"Track search failed for {search}.");
                 await Leave(ctx);
                 return;
             }
-            
+
             await conn.PlayAsync(loadResult.Tracks.First());
 
             await ctx.RespondAsync($"Now playing {loadResult.Tracks.First().Title}!").ConfigureAwait(false);
@@ -950,10 +947,7 @@ namespace Void_Bot
         private async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
-            if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected)
-            {
-                return;
-            }
+            if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
             try
             {
                 await e.Player.DisconnectAsync();
