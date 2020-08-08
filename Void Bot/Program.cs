@@ -10,6 +10,8 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Lavalink;
+using DSharpPlus.Net;
 
 namespace Void_Bot
 {
@@ -19,9 +21,11 @@ namespace Void_Bot
 
         private static CommandsNextExtension commands;
 
-        private static readonly string token = File.ReadAllText("token.txt");
+        public static LavalinkNodeConnection LavalinkNode;
 
         private static InteractivityExtension interactivity;
+
+        private static readonly string token = File.ReadAllText("token.txt");
 
         public static bool customstatus = false;
 
@@ -63,14 +67,33 @@ namespace Void_Bot
             };
             interactivity = discord.UseInteractivity(icfg);
             discord.GuildMemberAdded += Discord_GuildMemberAdded;
+
+            
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 PrefixResolver = ResolvePrefix,
                 EnableDms = false,
                 EnableMentionPrefix = false
             });
+
+            var endpoint = new ConnectionEndpoint
+            {
+                Hostname = "127.0.0.1", 
+                Port = 2333
+            };
+
+            var lavalinkConfig = new LavalinkConfiguration
+            {
+                Password = "youshallnotpass",
+                RestEndpoint = endpoint,
+                SocketEndpoint = endpoint
+            };
+
+            var lavalink = discord.UseLavalink();
+
             commands.RegisterCommands<Commands>();
             commands.RegisterCommands<UtilityCommands>();
+            commands.RegisterCommands<AudioCommands>();
             commands.RegisterCommands<AdministrationCommands>();
             commands.RegisterCommands<FunCommands>();
             commands.RegisterCommands<ExternalCommands>();
@@ -78,6 +101,8 @@ namespace Void_Bot
             commands.CommandExecuted += Commands_CommandExecuted;
             discord.MessageCreated += Discord_MessageCreated;
             await discord.ConnectAsync();
+
+            LavalinkNode = await lavalink.ConnectAsync(lavalinkConfig);
             await Task.Delay(2000);
             while (true)
             {

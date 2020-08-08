@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -14,6 +15,7 @@ namespace Void_Bot
         [Command("math")]
         [Aliases("maths")]
         [Description("Does simple math, (+, -, *, /), called with \"math (first num.) (operation) (second num.)\"")]
+        [Hidden]
         public async Task Add(CommandContext ctx, [RemainingText] string problem)
         {
             if (problem == null)
@@ -24,38 +26,44 @@ namespace Void_Bot
             }
 
             string type;
-            int one;
-            int two;
+            BigInteger one;
+            BigInteger two;
             if (problem.Contains('+'))
             {
                 var array = problem.Split('+');
                 type = "+";
-                one = int.Parse(array[0]);
-                two = int.Parse(array[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
             else if (problem.Contains('-'))
             {
-                var array2 = problem.Split('-');
+                var array = problem.Split('-');
                 type = "-";
-                one = int.Parse(array2[0]);
-                two = int.Parse(array2[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
             else if (problem.Contains('*'))
             {
-                var array3 = problem.Split('*');
+                var array = problem.Split('*');
                 type = "*";
-                one = int.Parse(array3[0]);
-                two = int.Parse(array3[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
+            }
+            else if (problem.Contains('%'))
+            {
+                var array = problem.Split('%');
+                type = "%";
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
             else
             {
                 if (!problem.Contains('/')) throw new ArgumentException();
-                var array4 = problem.Split('/');
+                var array = problem.Split('/');
                 type = "/";
-                one = int.Parse(array4[0]);
-                two = int.Parse(array4[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
-
             switch (type)
             {
                 case "+":
@@ -69,6 +77,9 @@ namespace Void_Bot
                     break;
                 case "/":
                     await ctx.RespondAsync($"Result: {one / two}");
+                    break;
+                case "%":
+                    await ctx.RespondAsync($"Result: {one % two}");
                     break;
             }
         }

@@ -190,5 +190,12 @@ namespace Void_Bot
             await ctx.RespondAsync(
                 "https://tenor.com/view/nonce-pedo-loop-itz_cam-gif-16228867");
         }
+
+        [Command("beemovie")]
+        [Description("the whole bee movie.")]
+        public async Task BeeMovie(CommandContext ctx)
+        {
+            await ctx.RespondWithFileAsync("beemovie.png");
+        }
     }
 }

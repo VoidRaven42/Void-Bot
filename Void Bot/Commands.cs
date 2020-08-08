@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -16,7 +16,9 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Reddit;
 using Reddit.Controllers;
-using static Void_Bot.ExternalCommands;
+using System.Management;
+using DSharpPlus.Lavalink;
+using DSharpPlus.Lavalink.EventArgs;
 
 //This file is here to allow easier use of commands, while allowing the help command to remain organised
 
@@ -39,40 +41,46 @@ namespace Void_Bot
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(ctx, ctx.Command.Name);
                 return;
             }
-
+            
             string type;
-            int one;
-            int two;
+            BigInteger one;
+            BigInteger two;
             if (problem.Contains('+'))
             {
                 var array = problem.Split('+');
                 type = "+";
-                one = int.Parse(array[0]);
-                two = int.Parse(array[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
             else if (problem.Contains('-'))
             {
-                var array2 = problem.Split('-');
+                var array = problem.Split('-');
                 type = "-";
-                one = int.Parse(array2[0]);
-                two = int.Parse(array2[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
             else if (problem.Contains('*'))
             {
-                var array3 = problem.Split('*');
+                var array = problem.Split('*');
                 type = "*";
-                one = int.Parse(array3[0]);
-                two = int.Parse(array3[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
+            }
+            else if (problem.Contains('%'))
+            {
+                var array = problem.Split('%');
+                type = "%";
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
             else
             {
                 if (!problem.Contains('/')) throw new ArgumentException();
-                var array4 = problem.Split('/');
+                var array = problem.Split('/');
                 type = "/";
-                one = int.Parse(array4[0]);
-                two = int.Parse(array4[1]);
+                one = BigInteger.Parse(array[0]);
+                two = BigInteger.Parse(array[1]);
             }
-
             switch (type)
             {
                 case "+":
@@ -86,6 +94,9 @@ namespace Void_Bot
                     break;
                 case "/":
                     await ctx.RespondAsync($"Result: {one / two}");
+                    break;
+                case "%":
+                    await ctx.RespondAsync($"Result: {one % two}");
                     break;
             }
         }
@@ -597,6 +608,7 @@ namespace Void_Bot
         [Command("reddit")]
         [Aliases("rd")]
         [Description("Gets one of the top 100 hot posts on the specified subreddit")]
+        [Hidden]
         public async Task Reddit(CommandContext ctx, string subreddit)
         {
             var random = new Random();
@@ -685,6 +697,7 @@ namespace Void_Bot
         [Command("eyebleach")]
         [Aliases("eb")]
         [Description("Gets one of the top 100 hot posts on r/eyebleach")]
+        [Hidden]
         public async Task Eyebleach(CommandContext ctx)
         {
             var random = new Random();
@@ -727,6 +740,7 @@ namespace Void_Bot
         [Command("e621")]
         [Aliases("e6")]
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
+        [Hidden]
         public async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
             if (!ctx.Channel.IsNSFW)
@@ -825,6 +839,128 @@ namespace Void_Bot
                 ex.R34Array[ex.R34Elem] = e;
                 ex.R34Elem += 1;
                 if (ex.R34Elem == 20) ex.R34Elem = 0;
+            }
+        }
+
+        [Command("beemovie")]
+        [Description("the whole bee movie.")]
+        [Hidden]
+        public async Task BeeMovie(CommandContext ctx)
+        {
+            await ctx.RespondWithFileAsync("beemovie.png");
+        }
+
+        //[Command("cputemp")]
+        public async Task CPUTemp(CommandContext ctx)
+        {
+            Double CPUtprt = 0;
+            System.Management.ManagementObjectSearcher mos = new System.Management.ManagementObjectSearcher(@"root\WMI", "Select * From MSAcpi_ThermalZoneTemperature");
+            foreach (System.Management.ManagementObject mo in mos.Get())
+            {
+                CPUtprt = Convert.ToDouble(Convert.ToDouble(mo.GetPropertyValue("CurrentTemperature").ToString()) - 2732) / 10;
+            }
+
+            await ctx.RespondAsync(CPUtprt.ToString());
+        }
+
+        [Command("join")]
+        [Aliases("connect")]
+        [Hidden]
+        public async Task Join(CommandContext ctx)
+        {
+            var node = Program.LavalinkNode;
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            await node.ConnectAsync(ctx.Member.VoiceState.Channel);
+            await ctx.RespondAsync($"Joined {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
+        }
+
+        [Command("leave")]
+        [Aliases("disconnect", "dc")]
+        [Hidden]
+        public async Task Leave(CommandContext ctx)
+        {
+            var node = Program.LavalinkNode;
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var conn = node.GetConnection(ctx.Guild);
+
+            if (conn == null)
+            {
+                await ctx.RespondAsync("Not connected.");
+                return;
+            }
+
+            await conn.DisconnectAsync();
+            await ctx.RespondAsync($"Left {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
+        }
+
+
+        [Command("aspeen")]
+        [Hidden]
+        public async Task Aspeen(CommandContext ctx)
+        {
+            await Play(ctx, "https://www.youtube.com/watch?v=cerkDJLuT_k");
+        }
+
+        [Command]
+        [Hidden]
+        public async Task Play(CommandContext ctx, [RemainingText] string search)
+        {
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var node = Program.LavalinkNode;
+            var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
+
+            if (conn == null)
+            {
+                await Join(ctx);
+            }
+            conn = node.GetConnection(ctx.Guild);
+            var loadResult = await node.Rest.GetTracksAsync(search);
+
+            if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed || loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
+            {
+                await ctx.RespondAsync($"Track search failed for {search}.");
+                await Leave(ctx);
+                return;
+            }
+            
+            await conn.PlayAsync(loadResult.Tracks.First());
+
+            await ctx.RespondAsync($"Now playing {loadResult.Tracks.First().Title}!").ConfigureAwait(false);
+            conn.PlaybackFinished += Conn_PlaybackFinished;
+        }
+
+
+        private async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
+        {
+            await Task.Delay(2000);
+            if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected)
+            {
+                return;
+            }
+            try
+            {
+                await e.Player.DisconnectAsync();
+            }
+            catch
+            {
+                // ignored
             }
         }
     }
