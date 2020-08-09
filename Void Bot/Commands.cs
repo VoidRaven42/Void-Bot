@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -900,6 +901,14 @@ namespace Void_Bot
                 return;
             }
 
+            if (ctx.Member.VoiceState.Channel != conn.Channel)
+            {
+                await ctx.RespondAsync("You must be in the same channel as the bot!");
+                return;
+            }
+
+            foreach (var elem in AudioCommands.queues[ctx.Guild.Id]) AudioCommands.queues.Remove(ctx.Guild.Id);
+
             await conn.DisconnectAsync();
             await ctx.RespondAsync($"Left {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
         }
@@ -937,20 +946,184 @@ namespace Void_Bot
                 return;
             }
 
-            await conn.PlayAsync(loadResult.Tracks.First());
+            var result = loadResult.Tracks.First();
+            if (AudioCommands.queues.ContainsKey(ctx.Guild.Id))
+            {
+                if (AudioCommands.queues[ctx.Guild.Id].IsEmpty && conn.CurrentState.CurrentTrack == null)
+                {
+                    await conn.PlayAsync(result);
+                }
+                else
+                {
+                    AudioCommands.queues[ctx.Guild.Id].Enqueue(result);
+                    await ctx.RespondAsync(
+                        "A track was already playing, the requested track has been added to the queue!");
+                    return;
+                }
+            }
+            else
+            {
+                AudioCommands.queues.Add(ctx.Guild.Id, new ConcurrentQueue<LavalinkTrack>());
+                await conn.PlayAsync(result);
+            }
 
             await ctx.RespondAsync($"Now playing {loadResult.Tracks.First().Title}!").ConfigureAwait(false);
             conn.PlaybackFinished += Conn_PlaybackFinished;
         }
 
+        [Command]
+        [Hidden]
+        public async Task Skip(CommandContext ctx)
+        {
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var node = Program.LavalinkNode;
+            var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
+
+            if (conn.CurrentState.CurrentTrack == null)
+            {
+                await ctx.RespondAsync("There is nothing playing!");
+                return;
+            }
+
+            var hasperms = false;
+            if (ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageMessages))
+                hasperms = true;
+            else
+                foreach (var elem in ctx.Member.Roles)
+                    if (elem.Name.ToUpper() == "DJ")
+                    {
+                        hasperms = true;
+                        break;
+                    }
+
+            if (hasperms == false)
+            {
+                await ctx.RespondAsync("You must have a role named \"DJ\", or manage messages permissions!");
+                return;
+            }
+
+            await conn.StopAsync();
+            await ctx.RespondAsync("Track skipped!");
+        }
+
+        [Command]
+        [Hidden]
+        public async Task Pause(CommandContext ctx)
+        {
+            var node = Program.LavalinkNode;
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var conn = node.GetConnection(ctx.Guild);
+
+
+            if (conn == null)
+            {
+                await ctx.RespondAsync("Not connected.");
+                return;
+            }
+
+            if (ctx.Member.VoiceState.Channel != conn.Channel)
+            {
+                await ctx.RespondAsync("You must be in the same channel as the bot!");
+                return;
+            }
+
+            await conn.PauseAsync();
+            await ctx.RespondAsync($"Track paused in {conn.Channel.Name}, use \"{ctx.Prefix}resume\" to resume");
+        }
+
+        [Command]
+        [Hidden]
+        public async Task Resume(CommandContext ctx)
+        {
+            var node = Program.LavalinkNode;
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var conn = node.GetConnection(ctx.Guild);
+
+
+            if (conn == null)
+            {
+                await ctx.RespondAsync("Not connected.");
+                return;
+            }
+
+            if (ctx.Member.VoiceState.Channel != conn.Channel)
+            {
+                await ctx.RespondAsync("You must be in the same channel as the bot!");
+                return;
+            }
+
+            await conn.ResumeAsync();
+            await ctx.RespondAsync("Track resumed!");
+        }
+
+        [Command("seek")]
+        [Description("Seeks to specified time in current track.")]
+        [Hidden]
+        public async Task Seek(CommandContext ctx,
+            [RemainingText] [Description("Which time point to seek to.")]
+            TimeSpan position)
+        {
+            var node = Program.LavalinkNode;
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var conn = node.GetConnection(ctx.Guild);
+
+
+            if (conn == null)
+            {
+                await ctx.RespondAsync("Not connected.");
+                return;
+            }
+
+            if (ctx.Member.VoiceState.Channel != conn.Channel)
+            {
+                await ctx.RespondAsync("You must be in the same channel as the bot!");
+                return;
+            }
+
+            await conn.SeekAsync(position);
+            await ctx.RespondAsync($"Track set to {position}!");
+        }
 
         private async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
+            if (e.Reason == TrackEndReason.Finished || e.Reason == TrackEndReason.Stopped)
+                if (!AudioCommands.queues[e.Player.Guild.Id].IsEmpty)
+                {
+                    AudioCommands.queues[e.Player.Guild.Id].TryDequeue(out var track);
+                    await e.Player.PlayAsync(track);
+                    e.Player.PlaybackFinished += Conn_PlaybackFinished;
+                    return;
+                }
+
             try
             {
-                await e.Player.DisconnectAsync();
+                if (e.Player.CurrentState.CurrentTrack == null)
+                    await e.Player.DisconnectAsync();
             }
             catch
             {
