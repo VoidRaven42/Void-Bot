@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
 
@@ -13,14 +14,14 @@ namespace Void_Bot
 {
     [Group("audio")]
     [Aliases("au")]
-    internal class AudioCommands : BaseCommandModule
+    public class AudioCommands : BaseCommandModule
     {
         public static Dictionary<ulong, ConcurrentQueue<LavalinkTrack>> queues =
             new Dictionary<ulong, ConcurrentQueue<LavalinkTrack>>();
 
         [Command("join")]
         [Aliases("connect")]
-        public async Task Join(CommandContext ctx)
+        public static async Task Join(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -36,7 +37,7 @@ namespace Void_Bot
 
         [Command("leave")]
         [Aliases("disconnect", "dc")]
-        public async Task Leave(CommandContext ctx)
+        public static async Task Leave(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -68,13 +69,13 @@ namespace Void_Bot
 
 
         [Command("aspeen")]
-        public async Task Aspeen(CommandContext ctx)
+        public static async Task Aspeen(CommandContext ctx)
         {
             await Play(ctx, "https://www.youtube.com/watch?v=cerkDJLuT_k");
         }
 
         [Command]
-        public async Task Play(CommandContext ctx, [RemainingText] string search)
+        public static async Task Play(CommandContext ctx, [RemainingText] string search)
         {
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -123,7 +124,7 @@ namespace Void_Bot
         }
 
         [Command]
-        public async Task Skip(CommandContext ctx)
+        public static async Task Skip(CommandContext ctx)
         {
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -162,7 +163,7 @@ namespace Void_Bot
         }
 
         [Command]
-        public async Task Pause(CommandContext ctx)
+        public static async Task Pause(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -192,7 +193,7 @@ namespace Void_Bot
         }
 
         [Command]
-        public async Task Resume(CommandContext ctx)
+        public static async Task Resume(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -223,7 +224,7 @@ namespace Void_Bot
 
         [Command("seek")]
         [Description("Seeks to specified time in current track.")]
-        public async Task Seek(CommandContext ctx,
+        public static async Task Seek(CommandContext ctx,
             [RemainingText] [Description("Which time point to seek to.")]
             TimeSpan position)
         {
@@ -250,11 +251,64 @@ namespace Void_Bot
                 return;
             }
 
+            if (conn.CurrentState.CurrentTrack.Length < position)
+            {
+                await ctx.RespondAsync($"You cannot seek past the end of the song! (Tried to seek to {position})");
+                return;
+            }
+
             await conn.SeekAsync(position);
             await ctx.RespondAsync($"Track set to {position}!");
         }
 
-        private async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
+        [Command]
+        [Aliases("q")]
+        public static async Task Queue(CommandContext ctx)
+        {
+            if (queues.ContainsKey(ctx.Guild.Id))
+            {
+                var embed = new DiscordEmbedBuilder()
+                {
+                    Title = "Queue",
+                    Color = DiscordColor.Azure
+                };
+                var node = Program.LavalinkNode;
+                var conn = node.GetConnection(ctx.Guild);
+                embed.AddField("Currently Playing", conn.CurrentState.CurrentTrack.Title);
+                var i = 1;
+                foreach (var elem in queues[ctx.Guild.Id])
+                {
+                    embed.AddField($"Track {i}", elem.Title, true);
+                    i++;
+                }
+
+                await ctx.RespondAsync(embed: embed);
+            }
+            else
+            {
+                await ctx.RespondAsync("Queue is empty!");
+            }
+        }
+
+        [Command]
+        [Aliases("np")]
+        public static async Task NowPlaying(CommandContext ctx)
+        {
+            var node = Program.LavalinkNode;
+            var conn = node.GetConnection(ctx.Guild);
+            var embed = new DiscordEmbedBuilder()
+            {
+                Title = "Now Playing",
+                Color = DiscordColor.Lilac
+            };
+            var current = conn.CurrentState.CurrentTrack;
+            embed.AddField("Title", current.Title);
+            embed.AddField("Position", conn.CurrentState.PlaybackPosition.ToString().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9').TrimEnd('.') + '/' + current.Length);
+
+            await ctx.RespondAsync(embed: embed);
+        }
+
+        public static async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
@@ -270,7 +324,10 @@ namespace Void_Bot
             try
             {
                 if (e.Player.CurrentState.CurrentTrack == null)
+                {
+                    queues.Remove(e.Player.Guild.Id);
                     await e.Player.DisconnectAsync();
+                }
             }
             catch
             {

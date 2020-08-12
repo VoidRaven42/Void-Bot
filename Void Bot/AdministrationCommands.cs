@@ -22,7 +22,7 @@ namespace Void_Bot
     {
         [Command("eval")]
         [Hidden]
-        public async Task Eval(CommandContext ctx, [RemainingText] [Description("Code to evaluate.")]
+        public static async Task Eval(CommandContext ctx, [RemainingText] [Description("Code to evaluate.")]
             string code)
         {
             if (ctx.User.Id == 379708744843395073L || ctx.User.Id == 227672468695810049L)
@@ -127,7 +127,7 @@ namespace Void_Bot
         [Aliases("channelprefix")]
         [Description("Sets custom command prefix for current guild. The bot will still respond to the default one.")]
         [RequirePermissions(Permissions.ManageGuild)]
-        public async Task SetPrefixAsync(CommandContext ctx, [Description("The prefix to use for current guild.")]
+        public static async Task SetPrefixAsync(CommandContext ctx, [Description("The prefix to use for current guild.")]
             string prefix)
         {
             var array = File.ReadAllLines("prefixes.txt").ToArray();
@@ -155,7 +155,7 @@ namespace Void_Bot
         [Aliases("clear")]
         [Description("Clears messages, up to 100 at a time")]
         [RequirePermissions(Permissions.ManageMessages)]
-        public async Task PurgeAsync(CommandContext ctx, [Description("The amount of messages to purge")]
+        public static async Task PurgeAsync(CommandContext ctx, [Description("The amount of messages to purge")]
             int amount)
         {
             if (amount <= 0)
@@ -188,7 +188,7 @@ namespace Void_Bot
         [Aliases("sendmessage", "botsend")]
         [Description("Sends a normal message in a channel, can be used for announcements")]
         [RequirePermissions(Permissions.ManageMessages)]
-        public async Task SendAsBot(CommandContext ctx, DiscordChannel channel, [RemainingText] string messagetosend)
+        public static async Task SendAsBot(CommandContext ctx, DiscordChannel channel, [RemainingText] string messagetosend)
         {
             if (channel.Guild.Id != ctx.Guild.Id)
             {
@@ -209,7 +209,7 @@ namespace Void_Bot
         [Command("setbotstatus")]
         [Aliases("status", "setstatus")]
         [Hidden]
-        public async Task Status(CommandContext ctx, string act, [RemainingText] string status)
+        public static async Task Status(CommandContext ctx, string act, [RemainingText] string status)
         {
             if (ctx.User.Id == 379708744843395073L)
             {
@@ -271,48 +271,14 @@ namespace Void_Bot
             }
         }
 
-        [Command("shutupnomiki")]
-        [RequirePermissions(Permissions.ManageMessages)]
-        [Hidden]
-        public async Task Shutup(CommandContext ctx)
-        {
-            if (!ctx.Guild.Members.ContainsKey(291665243992752141) &&
-                !ctx.Guild.Members.ContainsKey(264462171528757250))
-            {
-                await ctx.RespondAsync("The nomiki are not here");
-                return;
-            }
-
-            Settings.Default.IsHarisATwat = true;
-            Settings.Default.Save();
-            await ctx.RespondAsync("The nomiki are is now being suppressed");
-        }
-
-        [Command("unshutupnomiki")]
-        [RequirePermissions(Permissions.ManageMessages)]
-        [Hidden]
-        public async Task UnShutup(CommandContext ctx)
-        {
-            if (!ctx.Guild.Members.ContainsKey(291665243992752141) &&
-                !ctx.Guild.Members.ContainsKey(264462171528757250))
-            {
-                await ctx.RespondAsync("The nomiki are not here");
-                return;
-            }
-
-            Settings.Default.IsHarisATwat = false;
-            Settings.Default.Save();
-            await ctx.RespondAsync("The nomiki are no longer being suppressed");
-        }
-
         /*[Command("embed")]
         [Aliases("sendembed")]
         [RequirePermissions(Permissions.ManageMessages)]*/
-        public async Task Embed(CommandContext ctx, [RemainingText] string data)
+        public static async Task Embed(CommandContext ctx, [RemainingText] string data)
         {
         }
 
-        public async Task Test(CommandContext ctx)
+        public static async Task Test(CommandContext ctx)
         {
         }
 
