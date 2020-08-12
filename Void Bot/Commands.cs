@@ -1,25 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Management;
-using System.Numerics;
-using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Lavalink;
-using DSharpPlus.Lavalink.EventArgs;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using Reddit;
-using Reddit.Controllers;
 
 //This file is here to allow easier use of commands, while allowing the help command to remain organised
 
