@@ -17,24 +17,24 @@ namespace Void_Bot
     [Group("external")]
     [Aliases("e", "ex")]
     [Description("Commands that get posts from external websites")]
-    internal class ExternalCommands : BaseCommandModule
+    public class ExternalCommands : BaseCommandModule
     {
-        public string[] E6Array = new string[20];
-        public int E6Elem;
+        public static string[] E6Array = new string[20];
+        public static int E6Elem;
 
-        public string[] EBArray = new string[20];
-        public int EBElem;
+        public static string[] EBArray = new string[20];
+        public static int EBElem;
 
-        public string[] R34Array = new string[20];
-        public int R34Elem;
+        public static string[] R34Array = new string[20];
+        public static int R34Elem;
 
-        public string[] RedditArray = new string[20];
-        public int RedditElem;
+        public static string[] RedditArray = new string[20];
+        public static int RedditElem;
 
         [Command("reddit")]
         [Aliases("rd")]
         [Description("Gets one of the top 100 hot posts on the specified subreddit")]
-        public async Task Reddit(CommandContext ctx, string subreddit)
+        public static async Task Reddit(CommandContext ctx, string subreddit)
         {
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
@@ -122,7 +122,7 @@ namespace Void_Bot
         [Command("eyebleach")]
         [Aliases("eb")]
         [Description("Gets one of the top 100 hot posts on r/eyebleach")]
-        public async Task Eyebleach(CommandContext ctx)
+        public static async Task Eyebleach(CommandContext ctx)
         {
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
@@ -164,7 +164,7 @@ namespace Void_Bot
         [Command("e621")]
         [Aliases("e6")]
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
-        public async Task E621(CommandContext ctx, [RemainingText] string tags)
+        public static async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
             if (!ctx.Channel.IsNSFW)
             {
@@ -199,15 +199,20 @@ namespace Void_Bot
             }
             else
             {
+                var split = e.Split('|');
+                var img = split[0];
+                var direct = split[1];
                 Embed = new DiscordEmbedBuilder
                 {
                     Title = "Post Retrieved",
                     Color = DiscordColor.Aquamarine,
-                    ImageUrl = e
+                    ImageUrl = img,
+                    Url = direct
                 };
                 Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
+                Embed.AddField("Direct Link", direct);
                 await msg.ModifyAsync(embed: Embed.Build());
-                E6Array[E6Elem] = e;
+                E6Array[E6Elem] = img;
                 E6Elem += 1;
                 if (E6Elem == 20) E6Elem = 0;
             }
@@ -216,7 +221,7 @@ namespace Void_Bot
         [Command("rule34")]
         [Aliases("r34")]
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
-        public async Task R34(CommandContext ctx, [RemainingText] string tags)
+        public static async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
             if (!ctx.Channel.IsNSFW)
             {
@@ -265,7 +270,7 @@ namespace Void_Bot
             }
         }
 
-        public async Task<string> EHttpGet(string URI, string[] tags)
+        public static async Task<string> EHttpGet(string URI, string[] tags)
         {
             var client = new WebClient();
             if (tags != null)
@@ -286,18 +291,21 @@ namespace Void_Bot
             var random = new Random();
             if (!jo["posts"].Any()) return null;
             var img = "";
+            var url = "https://e621.net/posts/";
             for (var i = 0; i < 1000; i++)
             {
-                img = jo["posts"][random.Next(0, jo["posts"].Count() - 1)]["file"]["url"].ToString();
+                var num = random.Next(0, jo["posts"].Count() - 1);
+                img = jo["posts"][num]["file"]["url"].ToString();
+                url = url + jo["posts"][num]["id"].ToString();
                 if (!img.EndsWith("webm") && !img.EndsWith("swf") && !E6Array.Contains(img))
                     break;
             }
 
             if (img.EndsWith("webm") || img.EndsWith("swf")) img = null;
-            return img;
+            return img + '|' + url;
         }
 
-        public async Task<string> RHttpGet(string URI, string[] tags)
+        public static async Task<string> RHttpGet(string URI, string[] tags)
         {
             var array = tags;
             for (var i = 0; i < array.Length; i++)
