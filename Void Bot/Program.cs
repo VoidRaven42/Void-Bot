@@ -141,15 +141,7 @@ namespace Void_Bot
                     if (!e.Message.Content.ToLower().Contains(elem)) continue;
                     await e.Message.DeleteAsync();
                 }
-
-                if (e.Author.Id.Equals(291665243992752141) && Settings.Default.IsHarisATwat)
-                    await e.Message.DeleteAsync();
             }
-
-            if (!(e.Guild == null) &&
-                (e.Author.Id.Equals(291665243992752141) || e.Author.Id.Equals(264462171528757250)) &&
-                e.Guild.Id.ToString() == "302869055746998275" &&
-                Settings.Default.IsHarisATwat) await e.Message.DeleteAsync();
         }
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
@@ -222,7 +214,6 @@ namespace Void_Bot
             await e.Guild.SystemChannel.SendMessageAsync(null, false, Embed);
         }
 
-        //private static async Task 
         private static void OnProcessExit(object sender, EventArgs e)
         {
             Console.WriteLine("Disconnecting, then exiting in 2 seconds");

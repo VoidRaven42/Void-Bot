@@ -32,6 +32,7 @@ namespace Void_Bot
             }
 
             await node.ConnectAsync(ctx.Member.VoiceState.Channel);
+            queues.Add(ctx.Guild.Id, new ConcurrentQueue<LavalinkTrack>());
             await ctx.RespondAsync($"Joined {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
         }
 
