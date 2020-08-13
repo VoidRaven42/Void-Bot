@@ -21,7 +21,7 @@ namespace Void_Bot
 
         [Command("join")]
         [Aliases("connect")]
-        public static async Task Join(CommandContext ctx)
+        public async Task Join(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -38,7 +38,7 @@ namespace Void_Bot
 
         [Command("leave")]
         [Aliases("disconnect", "dc")]
-        public static async Task Leave(CommandContext ctx)
+        public async Task Leave(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -70,13 +70,13 @@ namespace Void_Bot
 
 
         [Command("aspeen")]
-        public static async Task Aspeen(CommandContext ctx)
+        public async Task Aspeen(CommandContext ctx)
         {
             await Play(ctx, "https://www.youtube.com/watch?v=cerkDJLuT_k");
         }
 
         [Command]
-        public static async Task Play(CommandContext ctx, [RemainingText] string search)
+        public async Task Play(CommandContext ctx, [RemainingText] string search)
         {
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -125,7 +125,7 @@ namespace Void_Bot
         }
 
         [Command]
-        public static async Task Skip(CommandContext ctx)
+        public async Task Skip(CommandContext ctx)
         {
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -164,7 +164,7 @@ namespace Void_Bot
         }
 
         [Command]
-        public static async Task Pause(CommandContext ctx)
+        public async Task Pause(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -194,7 +194,7 @@ namespace Void_Bot
         }
 
         [Command]
-        public static async Task Resume(CommandContext ctx)
+        public async Task Resume(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
 
@@ -225,7 +225,7 @@ namespace Void_Bot
 
         [Command("seek")]
         [Description("Seeks to specified time in current track.")]
-        public static async Task Seek(CommandContext ctx,
+        public async Task Seek(CommandContext ctx,
             [RemainingText] [Description("Which time point to seek to.")]
             TimeSpan position)
         {
@@ -264,7 +264,7 @@ namespace Void_Bot
 
         [Command]
         [Aliases("q")]
-        public static async Task Queue(CommandContext ctx)
+        public async Task Queue(CommandContext ctx)
         {
             if (queues.ContainsKey(ctx.Guild.Id))
             {
@@ -293,7 +293,7 @@ namespace Void_Bot
 
         [Command]
         [Aliases("np")]
-        public static async Task NowPlaying(CommandContext ctx)
+        public async Task NowPlaying(CommandContext ctx)
         {
             var node = Program.LavalinkNode;
             var conn = node.GetConnection(ctx.Guild);
@@ -309,7 +309,7 @@ namespace Void_Bot
             await ctx.RespondAsync(embed: embed);
         }
 
-        public static async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
+        public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;

@@ -34,7 +34,7 @@ namespace Void_Bot
         [Command("reddit")]
         [Aliases("rd")]
         [Description("Gets one of the top 100 hot posts on the specified subreddit")]
-        public static async Task Reddit(CommandContext ctx, string subreddit)
+        public async Task Reddit(CommandContext ctx, string subreddit)
         {
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
@@ -122,7 +122,7 @@ namespace Void_Bot
         [Command("eyebleach")]
         [Aliases("eb")]
         [Description("Gets one of the top 100 hot posts on r/eyebleach")]
-        public static async Task Eyebleach(CommandContext ctx)
+        public async Task Eyebleach(CommandContext ctx)
         {
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
@@ -164,7 +164,7 @@ namespace Void_Bot
         [Command("e621")]
         [Aliases("e6")]
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
-        public static async Task E621(CommandContext ctx, [RemainingText] string tags)
+        public async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
             if (!ctx.Channel.IsNSFW)
             {
@@ -221,7 +221,7 @@ namespace Void_Bot
         [Command("rule34")]
         [Aliases("r34")]
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
-        public static async Task R34(CommandContext ctx, [RemainingText] string tags)
+        public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
             if (!ctx.Channel.IsNSFW)
             {
@@ -270,7 +270,7 @@ namespace Void_Bot
             }
         }
 
-        public static async Task<string> EHttpGet(string URI, string[] tags)
+        public async Task<string> EHttpGet(string URI, string[] tags)
         {
             var client = new WebClient();
             if (tags != null)
@@ -305,7 +305,7 @@ namespace Void_Bot
             return img + '|' + url;
         }
 
-        public static async Task<string> RHttpGet(string URI, string[] tags)
+        public async Task<string> RHttpGet(string URI, string[] tags)
         {
             var array = tags;
             for (var i = 0; i < array.Length; i++)

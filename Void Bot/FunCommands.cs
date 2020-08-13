@@ -16,7 +16,7 @@ namespace Void_Bot
         [Command("mathduel")]
         [Aliases("duel", "mathsduel")]
         [Description("Challenges another user to a math duel!")]
-        public static async Task Duel(CommandContext ctx, [RemainingText] string userintake)
+        public async Task Duel(CommandContext ctx, [RemainingText] string userintake)
         {
             if (userintake == null)
             {
@@ -124,7 +124,7 @@ namespace Void_Bot
         [Command("speen")]
         [Aliases("spin")]
         [Description("SPEEN")]
-        public static async Task Speen(CommandContext ctx)
+        public async Task Speen(CommandContext ctx)
         {
             await ctx.RespondWithFileAsync("speen.mp4");
         }
@@ -132,14 +132,14 @@ namespace Void_Bot
         [Command("gun")]
         [Aliases("gunsong")]
         [Description("gun.")]
-        public static async Task Gun(CommandContext ctx)
+        public async Task Gun(CommandContext ctx)
         {
             await ctx.RespondWithFileAsync("gun.mp4");
         }
 
         [Command("no")]
         [Description("no.")]
-        public static async Task No(CommandContext ctx)
+        public async Task No(CommandContext ctx)
         {
             await ctx.RespondWithFileAsync("no.mp4");
         }
@@ -147,7 +147,7 @@ namespace Void_Bot
         [Command("loaf")]
         [Aliases("bunny")]
         [Description("sends BUNNI!")]
-        public static async Task Loaf(CommandContext ctx)
+        public async Task Loaf(CommandContext ctx)
         {
             await ctx.RespondAsync(
                 "https://media.discordapp.net/attachments/670925998434418688/734602804362084455/image0.gif");
@@ -155,7 +155,7 @@ namespace Void_Bot
 
         [Command("knuckles")]
         [Description("you don't want to use this command")]
-        public static async Task Knuckles(CommandContext ctx)
+        public async Task Knuckles(CommandContext ctx)
         {
             await ctx.RespondAsync("https://cdn.discordapp.com/emojis/595433217440350248.gif");
         }
@@ -163,14 +163,14 @@ namespace Void_Bot
         [Command("horny")]
         [Aliases("bonk")]
         [Description("bonk.")]
-        public static async Task Horny(CommandContext ctx)
+        public async Task Horny(CommandContext ctx)
         {
             await ctx.RespondAsync("https://tenor.com/view/horny-jail-bonk-dog-hit-head-stop-being-horny-gif-17298755");
         }
 
         [Command("gitgud")]
         [Description("git gud!")]
-        public static async Task Gitgud(CommandContext ctx)
+        public async Task Gitgud(CommandContext ctx)
         {
             await ctx.RespondAsync(
                 "https://cdn.discordapp.com/attachments/681973069333659654/740325342438359091/image0.png");
@@ -178,14 +178,14 @@ namespace Void_Bot
 
         [Command("turnofflifesupport")]
         [Description("rip grandma")]
-        public static async Task LifeSupport(CommandContext ctx)
+        public async Task LifeSupport(CommandContext ctx)
         {
             await ctx.RespondAsync("Grandma has been terminated.");
         }
 
         [Command("nonce")]
         [Description("nonce!")]
-        public static async Task Nonce(CommandContext ctx)
+        public async Task Nonce(CommandContext ctx)
         {
             await ctx.RespondAsync(
                 "https://tenor.com/view/nonce-pedo-loop-itz_cam-gif-16228867");
@@ -193,13 +193,13 @@ namespace Void_Bot
 
         [Command("beemovie")]
         [Description("the whole bee movie.")]
-        public static async Task BeeMovie(CommandContext ctx)
+        public async Task BeeMovie(CommandContext ctx)
         {
             await ctx.RespondWithFileAsync("beemovie.png");
         }
 
         [Command("fuckoff")]
-        public static async Task Fuckoff(CommandContext ctx)
+        public async Task Fuckoff(CommandContext ctx)
         {
             await ctx.RespondAsync(
                 "https://cdn.discordapp.com/attachments/730455843484467292/742434971716681879/image0-2.png");
