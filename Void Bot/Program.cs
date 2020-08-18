@@ -72,7 +72,6 @@ namespace Void_Bot
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 PrefixResolver = ResolvePrefix,
-                EnableDms = false,
                 EnableMentionPrefix = false
             });
 
@@ -154,6 +153,11 @@ namespace Void_Bot
             DiscordEmbedBuilder embed = null;
             var ex = e.Exception;
             while (ex is AggregateException) ex = ex.InnerException;
+            if (e.Context.Guild == null)
+            {
+                await e.Context.RespondAsync("This command cannot be used in DM channels! Please try another!");
+                return;
+            }
             if (ex is ArgumentException && e.Context.RawArgumentString == "")
             {
                 await e.Context.RespondAsync("Command Help:");

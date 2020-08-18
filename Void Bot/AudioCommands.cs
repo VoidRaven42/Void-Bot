@@ -62,7 +62,7 @@ namespace Void_Bot
                 return;
             }
 
-            foreach (var elem in queues[ctx.Guild.Id]) queues.Remove(ctx.Guild.Id);
+            queues.Remove(ctx.Guild.Id);
 
             await conn.DisconnectAsync();
             await ctx.RespondAsync($"Left {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
@@ -95,7 +95,8 @@ namespace Void_Bot
                 loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
             {
                 await ctx.RespondAsync($"Track search failed for {search}.");
-                await Leave(ctx);
+                if (conn.CurrentState.CurrentTrack == null)
+                    await Leave(ctx);
                 return;
             }
 
@@ -110,7 +111,7 @@ namespace Void_Bot
                 {
                     queues[ctx.Guild.Id].Enqueue(result);
                     await ctx.RespondAsync(
-                        "A track was already playing, the requested track has been added to the queue!");
+                        $"A track was already playing, the requested track ( {result.Title}, {"https://youtu.be/" + result.Uri.ToString()[^11..]} ) has been added to the queue!");
                     return;
                 }
             }
@@ -120,7 +121,9 @@ namespace Void_Bot
                 await conn.PlayAsync(result);
             }
 
-            await ctx.RespondAsync($"Now playing {loadResult.Tracks.First().Title}!").ConfigureAwait(false);
+            await ctx.RespondAsync(
+                    $"Now playing {result.Title} by {result.Author} ( {"https://youtu.be/" + result.Uri.ToString()[^11..]} )!")
+                .ConfigureAwait(false);
             conn.PlaybackFinished += Conn_PlaybackFinished;
         }
 
@@ -268,18 +271,19 @@ namespace Void_Bot
         {
             if (queues.ContainsKey(ctx.Guild.Id))
             {
-                var embed = new DiscordEmbedBuilder()
+                var embed = new DiscordEmbedBuilder
                 {
                     Title = "Queue",
                     Color = DiscordColor.Azure
                 };
                 var node = Program.LavalinkNode;
                 var conn = node.GetConnection(ctx.Guild);
-                embed.AddField("Currently Playing", conn.CurrentState.CurrentTrack.Title);
+                embed.AddField("Currently Playing",
+                    conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
                 var i = 1;
                 foreach (var elem in queues[ctx.Guild.Id])
                 {
-                    embed.AddField($"Track {i}", elem.Title, true);
+                    embed.AddField($"Track {i}", elem.Title + " by " + elem.Author, true);
                     i++;
                 }
 
@@ -297,14 +301,19 @@ namespace Void_Bot
         {
             var node = Program.LavalinkNode;
             var conn = node.GetConnection(ctx.Guild);
-            var embed = new DiscordEmbedBuilder()
+            var embed = new DiscordEmbedBuilder
             {
                 Title = "Now Playing",
                 Color = DiscordColor.Lilac
             };
             var current = conn.CurrentState.CurrentTrack;
             embed.AddField("Title", current.Title);
-            embed.AddField("Position", conn.CurrentState.PlaybackPosition.ToString().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9').TrimEnd('.') + '/' + current.Length);
+            embed.AddField("Position",
+                conn.CurrentState.PlaybackPosition.ToString().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+                    .TrimEnd('.') + '/' + current.Length, true);
+            embed.AddField("Channel", current.Author, true);
+            embed.AddField("Direct Link", "https://youtu.be/" + current.Uri.ToString()[^11..]);
+            embed.WithThumbnail("https://img.youtube.com/vi/" + current.Uri.ToString()[^11..] + "/0.jpg");
 
             await ctx.RespondAsync(embed: embed);
         }
