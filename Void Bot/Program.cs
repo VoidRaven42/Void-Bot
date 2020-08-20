@@ -131,21 +131,10 @@ namespace Void_Bot
             {
                 if (!customstatus)
                 {
-                    foreach (var elem in discord.ShardClients.Values)
-                    {
-                        var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}", ActivityType.Watching);
-                        await discord.UpdateStatusAsync(activity);
-                    }
-                }
-
-                await Task.Delay(TimeSpan.FromMinutes(1));
-
-                if (!customstatus)
-                {
                     var amount = 0;
                     foreach (var elem in discord.ShardClients.Values)
                     {
-                        foreach (var guild in elem.Guilds) amount += guild.Value.Members.Count;
+                        foreach (var guild in elem.Guilds) amount += guild.Value.Members.Values.Count(x => !x.IsBot);
                     }
                     var status = amount + " users";
                     var activity = new DiscordActivity(status, ActivityType.Watching);
@@ -167,6 +156,17 @@ namespace Void_Bot
                     await discord.UpdateStatusAsync(activity);
                 }
 
+                await Task.Delay(TimeSpan.FromMinutes(1)); 
+                
+                if (!customstatus)
+                {
+                    foreach (var elem in discord.ShardClients.Values)
+                    {
+                        var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}", ActivityType.Watching);
+                        await discord.UpdateStatusAsync(activity);
+                    }
+                }
+
                 await Task.Delay(TimeSpan.FromMinutes(1));
             }
         }
@@ -183,11 +183,8 @@ namespace Void_Bot
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
-            e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "Void Bot",
-                string.Format("User '{0}#{1}' ({2}) tried to execute '{3}' ", e.Context.User.Username,
-                    e.Context.User.Discriminator, e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>") +
-                $"in #{e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}) and failed with {e.Exception.GetType()}: {e.Exception.Message}",
-                DateTime.Now);
+
+            
             DiscordEmbedBuilder embed = null;
             var ex = e.Exception;
             while (ex is AggregateException) ex = ex.InnerException;
@@ -233,14 +230,20 @@ namespace Void_Bot
                 await e.Context.RespondAsync("Incorrect usage of command.\nCommand Help:");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
-
+            e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "Void Bot",
+                string.Format("User '{0}#{1}' ({2}) tried to execute '{3}' ", e.Context.User.Username,
+                    e.Context.User.Discriminator, e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>") +
+                $"in #{e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}) and failed with {e.Exception.GetType()}: {e.Exception.Message}",
+                DateTime.Now);
             if (embed != null) await e.Context.RespondAsync("", false, embed.Build());
         }
 
         private static async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
         {
             discord.DebugLogger.LogMessage(LogLevel.Info, "Void Bot",
-                $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}).",
+                e.Context.Guild == null
+                    ? $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in (a DM channel))."
+                    : $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}).",
                 DateTime.Now);
         }
 
@@ -254,7 +257,8 @@ namespace Void_Bot
             };
             Embed.AddField("Welcome to ", e.Guild.Name, true);
             Embed.AddField("New member: ", e.Member.DisplayName + "#" + e.Member.Discriminator, true);
-            await e.Guild.SystemChannel.SendMessageAsync(null, false, Embed);
+            if (e.Guild.SystemChannel != null)
+                await e.Guild.SystemChannel.SendMessageAsync(null, false, Embed);
         }
 
         private static void OnProcessExit(object sender, EventArgs e)
@@ -283,8 +287,11 @@ namespace Void_Bot
                 guildprefixes.Add(split[0], split[1]);
             }
 
-            if (guildprefixes.ContainsKey(msg.Channel.Guild.Id.ToString()))
-                customPrefix[1] = guildprefixes[msg.Channel.Guild.Id.ToString()];
+            if (msg.Channel.Guild != null)
+            {
+                if (guildprefixes.ContainsKey(msg.Channel.Guild.Id.ToString()))
+                    customPrefix[1] = guildprefixes[msg.Channel.Guild.Id.ToString()];
+            }
             var argPos = msg.GetMentionPrefixLength(discord.CurrentUser);
             if (customPrefix[1] == null)
             {
@@ -306,46 +313,6 @@ namespace Void_Bot
             }
 
             return Task.FromResult(argPos);
-        }
-
-        public static async Task shutdown(CommandContext ctx, string text)
-        {
-            if (text.ToLower() == "jasper'ssexdrive" || text.ToLower() == "jasperssexdrive")
-                await ctx.RespondAsync("Sex drive removed!");
-        }
-
-        public static async Task sexdrive(CommandContext ctx)
-        {
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = "Sex drive restored!",
-                Color = new DiscordColor(16711680)
-            };
-            var msg = await ctx.RespondAsync(null, false, embed.Build());
-            for (var i = 0; i < 10; i++)
-            {
-                Thread.Sleep(1000);
-                embed.Color = new DiscordColor(16753920);
-                await msg.ModifyAsync(default, embed.Build());
-                Thread.Sleep(1000);
-                embed.Color = new DiscordColor(16776960);
-                await msg.ModifyAsync(default, embed.Build());
-                Thread.Sleep(1000);
-                embed.Color = new DiscordColor(65280);
-                await msg.ModifyAsync(default, embed.Build());
-                Thread.Sleep(1000);
-                embed.Color = new DiscordColor(255);
-                await msg.ModifyAsync(default, embed.Build());
-                Thread.Sleep(1000);
-                embed.Color = new DiscordColor(6815999);
-                await msg.ModifyAsync(default, embed.Build());
-                Thread.Sleep(1000);
-                embed.Color = new DiscordColor(11927807);
-                await msg.ModifyAsync(default, embed.Build());
-                Thread.Sleep(1000);
-                embed.Color = new DiscordColor(16711680);
-                await msg.ModifyAsync(default, embed.Build());
-            }
         }
     }
 }

@@ -75,16 +75,32 @@ namespace Void_Bot
                 Exception rex;
                 try
                 {
-                    css = await cs.RunAsync(new Globals
+                    if (ctx.Guild == null)
                     {
-                        context = ctx,
-                        user = ctx.User,
-                        client = ctx.Client,
-                        guild = ctx.Guild,
-                        member = ctx.Member,
-                        channel = ctx.Channel
-                    });
-                    rex = css.Exception;
+                        css = await cs.RunAsync(new Globals
+                        {
+                            context = ctx,
+                            user = ctx.User,
+                            client = ctx.Client,
+                            member = ctx.Member,
+                            channel = ctx.Channel
+                        });
+                        rex = css.Exception;
+                    }
+                    else
+                    {
+                        css = await cs.RunAsync(new Globals
+                        {
+                            context = ctx,
+                            user = ctx.User,
+                            client = ctx.Client,
+                            guild = ctx.Guild,
+                            member = ctx.Member,
+                            channel = ctx.Channel
+                        });
+                        rex = css.Exception;
+                    }
+                    
                 }
                 catch (Exception ex)
                 {
@@ -130,6 +146,11 @@ namespace Void_Bot
         public async Task SetPrefixAsync(CommandContext ctx, [Description("The prefix to use for current guild.")]
             string prefix)
         {
+            if (ctx.Guild.Equals(null))
+            {
+                await ctx.RespondAsync("You can't change the prefix of a DM channel!");
+                return;
+            }
             var array = File.ReadAllLines("prefixes.txt").ToArray();
             var guildprefixes = new Dictionary<string, string>();
             var array2 = array;
