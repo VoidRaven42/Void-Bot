@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -17,13 +20,9 @@ namespace Void_Bot
 {
     public class Program
     {
-        public static DiscordClient discord;
-
-        private static CommandsNextExtension commands;
+        public static DiscordShardedClient discord;
 
         public static LavalinkNodeConnection LavalinkNode;
-
-        private static InteractivityExtension interactivity;
 
         private static readonly string token = File.ReadAllText("token.txt");
 
@@ -36,6 +35,13 @@ namespace Void_Bot
             "aidan is not cute", "aidanugly", "aidan ugly", "ai dan not cute", "aidan is uncute", "aidann not cute",
             "aidan is ugle", "a i d a n  n o t  c u t e"
         };
+
+        public static IReadOnlyDictionary<int, CommandsNextExtension> Commands { get; set; }
+
+        public static IReadOnlyDictionary<int, LavalinkExtension> Lavalink { get; set; }
+
+
+        public static IReadOnlyDictionary<int, InteractivityExtension> Interactivity { get; set; }
 
         public static void Main(string[] args)
         {
@@ -53,7 +59,7 @@ namespace Void_Bot
 
         private static async Task MainAsync(string[] args)
         {
-            discord = new DiscordClient(new DiscordConfiguration
+            discord = new DiscordShardedClient(new DiscordConfiguration
             {
                 Token = token,
                 TokenType = TokenType.Bot,
@@ -61,23 +67,9 @@ namespace Void_Bot
                 LogLevel = LogLevel.Info
             });
 
-            var icfg = new InteractivityConfiguration
-            {
-                Timeout = TimeSpan.FromSeconds(20.0)
-            };
-            interactivity = discord.UseInteractivity(icfg);
-            discord.GuildMemberAdded += Discord_GuildMemberAdded;
-
-            
-            commands = discord.UseCommandsNext(new CommandsNextConfiguration
-            {
-                PrefixResolver = ResolvePrefix,
-                EnableMentionPrefix = false
-            });
-
             var endpoint = new ConnectionEndpoint
             {
-                Hostname = "127.0.0.1", 
+                Hostname = "127.0.0.1",
                 Port = 2333
             };
 
@@ -88,29 +80,73 @@ namespace Void_Bot
                 SocketEndpoint = endpoint
             };
 
-            var lavalink = discord.UseLavalink();
 
-            commands.RegisterCommands<Commands>();
-            commands.RegisterCommands<UtilityCommands>();
-            commands.RegisterCommands<AudioCommands>();
-            commands.RegisterCommands<AdministrationCommands>();
-            commands.RegisterCommands<FunCommands>();
-            commands.RegisterCommands<ExternalCommands>();
-            commands.CommandErrored += Commands_CommandErrored;
-            commands.CommandExecuted += Commands_CommandExecuted;
+            Lavalink = await discord.UseLavalinkAsync();
+
+            var icfg = new InteractivityConfiguration
+            {
+                Timeout = TimeSpan.FromSeconds(20.0)
+            };
+            Interactivity = await discord.UseInteractivityAsync(icfg);
+            discord.GuildMemberAdded += Discord_GuildMemberAdded;
+
+
+            Commands = await discord.UseCommandsNextAsync(new CommandsNextConfiguration
+            {
+                PrefixResolver = ResolvePrefix,
+                EnableMentionPrefix = false
+            });
+
+
+            foreach (var commands in Commands.Values)
+            {
+                commands.RegisterCommands<Commands>();
+                commands.RegisterCommands<UtilityCommands>();
+                commands.RegisterCommands<AudioCommands>();
+                commands.RegisterCommands<AdministrationCommands>();
+                commands.RegisterCommands<FunCommands>();
+                commands.RegisterCommands<ExternalCommands>();
+                commands.CommandErrored += Commands_CommandErrored;
+                commands.CommandExecuted += Commands_CommandExecuted;
+            }
+
+
             discord.MessageCreated += Discord_MessageCreated;
-            await discord.ConnectAsync();
+            await discord.StartAsync();
 
-            LavalinkNode = await lavalink.ConnectAsync(lavalinkConfig);
+            try
+            {
+                foreach (var extension in Lavalink.Values) await extension.ConnectAsync(lavalinkConfig);
+            }
+            catch (Exception ex)
+            {
+                if (ex is SocketException || ex is HttpRequestException || ex is WebSocketException)
+                    Console.WriteLine("Can't connect to lavalink! (music commands are disabled)");
+                else
+                    throw;
+            }
+
             await Task.Delay(2000);
             while (true)
             {
                 if (!customstatus)
                 {
+                    foreach (var elem in discord.ShardClients.Values)
+                    {
+                        var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}", ActivityType.Watching);
+                        await discord.UpdateStatusAsync(activity);
+                    }
+                }
+
+                await Task.Delay(TimeSpan.FromMinutes(1));
+
+                if (!customstatus)
+                {
                     var amount = 0;
-
-                    foreach (var elem in discord.Guilds) amount += elem.Value.Members.Count;
-
+                    foreach (var elem in discord.ShardClients.Values)
+                    {
+                        foreach (var guild in elem.Guilds) amount += guild.Value.Members.Count;
+                    }
                     var status = amount + " users";
                     var activity = new DiscordActivity(status, ActivityType.Watching);
                     await discord.UpdateStatusAsync(activity);
@@ -120,7 +156,11 @@ namespace Void_Bot
 
                 if (!customstatus)
                 {
-                    var amount = discord.Guilds.Count;
+                    var amount = 0;
+                    foreach (var elem in discord.ShardClients.Values)
+                    {
+                        amount += elem.Guilds.Count;
+                    }
 
                     var status = amount + " servers";
                     var activity = new DiscordActivity(status, ActivityType.Watching);
@@ -134,13 +174,11 @@ namespace Void_Bot
         private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
         {
             if (!(e.Guild == null) && e.Guild.Id.ToString() == "642067509931147264")
-            {
                 foreach (var elem in bannedwords)
                 {
                     if (!e.Message.Content.ToLower().Contains(elem)) continue;
                     await e.Message.DeleteAsync();
                 }
-            }
         }
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
@@ -158,6 +196,7 @@ namespace Void_Bot
                 await e.Context.RespondAsync("This command cannot be used in DM channels! Please try another!");
                 return;
             }
+
             if (ex is ArgumentException && e.Context.RawArgumentString == "")
             {
                 await e.Context.RespondAsync("Command Help:");
@@ -220,8 +259,11 @@ namespace Void_Bot
 
         private static void OnProcessExit(object sender, EventArgs e)
         {
-            Console.WriteLine("Disconnecting, then exiting in 2 seconds");
-            discord.DisconnectAsync();
+            Console.WriteLine("Disconnecting from all shards, then exiting in 2 seconds");
+            foreach (var elem in discord.ShardClients.Values)
+            {
+                elem.DisconnectAsync();
+            }
             Thread.Sleep(2000);
         }
 

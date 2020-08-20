@@ -40,7 +40,7 @@ namespace Void_Bot
             var user = ctx.User;
             if (usertrim.All(char.IsDigit))
             {
-                user = await Program.discord.GetUserAsync(ulong.Parse(usertrim));
+                user = await ctx.Client.GetUserAsync(ulong.Parse(usertrim));
 
                 var interactivity = ctx.Client.GetInteractivity();
                 var random = new Random();

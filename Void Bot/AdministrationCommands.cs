@@ -79,7 +79,7 @@ namespace Void_Bot
                     {
                         context = ctx,
                         user = ctx.User,
-                        client = Program.discord,
+                        client = ctx.Client,
                         guild = ctx.Guild,
                         member = ctx.Member,
                         channel = ctx.Channel
@@ -228,15 +228,6 @@ namespace Void_Bot
                 {
                     await ctx.RespondAsync("Please enter a valid activity and status");
                     return;
-                }
-
-                if (status.ToLower() == "users")
-                {
-                    var amount = 0;
-                    var client = Program.discord;
-                    foreach (var elem in client.Guilds) amount += elem.Value.Members.Count;
-
-                    status = amount + " users";
                 }
 
                 new DiscordActivity();
