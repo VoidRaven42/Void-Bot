@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -22,8 +23,6 @@ namespace Void_Bot
     {
         public static DiscordShardedClient discord;
 
-        public static LavalinkNodeConnection LavalinkNode;
-
         private static readonly string token = File.ReadAllText("token.txt");
 
         public static bool customstatus = false;
@@ -40,10 +39,24 @@ namespace Void_Bot
 
         public static IReadOnlyDictionary<int, LavalinkExtension> Lavalink { get; set; }
 
+        public static Dictionary<int, LavalinkNodeConnection> LavalinkNodes { get; set; }
 
         public static IReadOnlyDictionary<int, InteractivityExtension> Interactivity { get; set; }
 
-        public static void Main(string[] args)
+        public static ConnectionEndpoint endpoint = new ConnectionEndpoint
+        {
+            Hostname = "127.0.0.1",
+            Port = 2333
+        };
+
+        public static LavalinkConfiguration lavalinkConfig = new LavalinkConfiguration
+        {
+            Password = "youshallnotpass",
+            RestEndpoint = endpoint,
+            SocketEndpoint = endpoint
+        };
+
+    public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
             try
@@ -66,21 +79,7 @@ namespace Void_Bot
                 UseInternalLogHandler = true,
                 LogLevel = LogLevel.Info
             });
-
-            var endpoint = new ConnectionEndpoint
-            {
-                Hostname = "127.0.0.1",
-                Port = 2333
-            };
-
-            var lavalinkConfig = new LavalinkConfiguration
-            {
-                Password = "youshallnotpass",
-                RestEndpoint = endpoint,
-                SocketEndpoint = endpoint
-            };
-
-
+            
             Lavalink = await discord.UseLavalinkAsync();
 
             var icfg = new InteractivityConfiguration
@@ -116,7 +115,10 @@ namespace Void_Bot
 
             try
             {
-                foreach (var extension in Lavalink.Values) await extension.ConnectAsync(lavalinkConfig);
+                foreach (var extension in Lavalink.Values)
+                { 
+                    AudioCommands.Lavalink = await extension.ConnectAsync(lavalinkConfig);
+                }
             }
             catch (Exception ex)
             {

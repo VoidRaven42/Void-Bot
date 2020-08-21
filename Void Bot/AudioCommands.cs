@@ -19,18 +19,24 @@ namespace Void_Bot
         public static Dictionary<ulong, ConcurrentQueue<LavalinkTrack>> queues =
             new Dictionary<ulong, ConcurrentQueue<LavalinkTrack>>();
 
+        public static LavalinkNodeConnection Lavalink { get; set; }
+
         [Command("join")]
         [Aliases("connect")]
         public async Task Join(CommandContext ctx)
         {
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
 
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You must be in a voice channel!");
                 return;
             }
-
+            var conn = node.GetConnection(ctx.Guild);
+            if (conn.IsConnected)
+            {
+                await ctx.RespondAsync($"Already connected to {conn.Channel}!");
+            }
             await node.ConnectAsync(ctx.Member.VoiceState.Channel);
             queues.Add(ctx.Guild.Id, new ConcurrentQueue<LavalinkTrack>());
             await ctx.RespondAsync($"Joined {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
@@ -40,7 +46,7 @@ namespace Void_Bot
         [Aliases("disconnect", "dc")]
         public async Task Leave(CommandContext ctx)
         {
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
 
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -78,13 +84,14 @@ namespace Void_Bot
         [Command]
         public async Task Play(CommandContext ctx, [RemainingText] string search)
         {
+
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You must be in a voice channel!");
                 return;
             }
 
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
             var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
 
             if (conn == null) await Join(ctx);
@@ -136,7 +143,7 @@ namespace Void_Bot
                 return;
             }
 
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
             var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
 
             if (conn.CurrentState.CurrentTrack == null)
@@ -169,7 +176,7 @@ namespace Void_Bot
         [Command]
         public async Task Pause(CommandContext ctx)
         {
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
 
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -199,7 +206,7 @@ namespace Void_Bot
         [Command]
         public async Task Resume(CommandContext ctx)
         {
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
 
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -232,7 +239,7 @@ namespace Void_Bot
             [RemainingText] [Description("Which time point to seek to.")]
             TimeSpan position)
         {
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
 
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
@@ -276,7 +283,7 @@ namespace Void_Bot
                     Title = "Queue",
                     Color = DiscordColor.Azure
                 };
-                var node = Program.LavalinkNode;
+                var node = Lavalink;
                 var conn = node.GetConnection(ctx.Guild);
                 embed.AddField("Currently Playing",
                     conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
@@ -299,7 +306,7 @@ namespace Void_Bot
         [Aliases("np")]
         public async Task NowPlaying(CommandContext ctx)
         {
-            var node = Program.LavalinkNode;
+            var node = Lavalink;
             var conn = node.GetConnection(ctx.Guild);
             var embed = new DiscordEmbedBuilder
             {
