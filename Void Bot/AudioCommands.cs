@@ -19,6 +19,8 @@ namespace Void_Bot
         public static Dictionary<ulong, ConcurrentQueue<LavalinkTrack>> queues =
             new Dictionary<ulong, ConcurrentQueue<LavalinkTrack>>();
 
+        public static Dictionary<ulong, bool> loops = new Dictionary<ulong, bool>();
+
         public static LavalinkNodeConnection Lavalink { get; set; }
 
         [Command("join")]
@@ -33,12 +35,17 @@ namespace Void_Bot
                 return;
             }
             var conn = node.GetConnection(ctx.Guild);
-            if (conn.IsConnected)
+            if (conn != null)
             {
-                await ctx.RespondAsync($"Already connected to {conn.Channel}!");
+                if (conn.IsConnected)
+                {
+                    await ctx.RespondAsync($"Already connected to {conn.Channel}!");
+                    return;
+                }
             }
             await node.ConnectAsync(ctx.Member.VoiceState.Channel);
             queues.Add(ctx.Guild.Id, new ConcurrentQueue<LavalinkTrack>());
+            loops.Add(ctx.Guild.Id, false);
             await ctx.RespondAsync($"Joined {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
         }
 
@@ -69,6 +76,7 @@ namespace Void_Bot
             }
 
             queues.Remove(ctx.Guild.Id);
+            loops.Remove(ctx.Guild.Id);
 
             await conn.DisconnectAsync();
             await ctx.RespondAsync($"Left {ctx.Member.VoiceState.Channel.Name}!").ConfigureAwait(false);
@@ -153,7 +161,7 @@ namespace Void_Bot
             }
 
             var hasperms = false;
-            if (ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageMessages))
+            if (ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageChannels))
                 hasperms = true;
             else
                 foreach (var elem in ctx.Member.Roles)
@@ -165,7 +173,7 @@ namespace Void_Bot
 
             if (hasperms == false)
             {
-                await ctx.RespondAsync("You must have a role named \"DJ\", or manage messages permissions!");
+                await ctx.RespondAsync("You must have a role named \"DJ\", or manage channel permissions!");
                 return;
             }
 
@@ -294,7 +302,15 @@ namespace Void_Bot
                     i++;
                 }
 
-                await ctx.RespondAsync(embed: embed);
+                try
+                {
+                    await ctx.RespondAsync(embed: embed);
+                }
+                catch (ArgumentException e)
+                {
+                    await ctx.RespondAsync(
+                        $"Queue is too long to display, it has {queues[ctx.Guild.Id].Count} tracks in it.");
+                }
             }
             else
             {
@@ -325,11 +341,76 @@ namespace Void_Bot
             await ctx.RespondAsync(embed: embed);
         }
 
+        [Command("loop")]
+        public async Task Loop(CommandContext ctx)
+        {
+            var node = Lavalink;
+
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var conn = node.GetConnection(ctx.Guild);
+
+
+            if (conn == null)
+            {
+                await ctx.RespondAsync("Not connected.");
+                return;
+            }
+
+            if (ctx.Member.VoiceState.Channel != conn.Channel)
+            {
+                await ctx.RespondAsync("You must be in the same channel as the bot!");
+                return;
+            }
+
+            var hasperms = false;
+            if (ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageChannels))
+                hasperms = true;
+            else
+                foreach (var elem in ctx.Member.Roles)
+                    if (elem.Name.ToUpper() == "DJ")
+                    {
+                        hasperms = true;
+                        break;
+                    }
+
+            if (hasperms == false)
+            {
+                await ctx.RespondAsync("You must have a role named \"DJ\", or manage channel permissions!");
+                return;
+            }
+
+            if (loops[ctx.Guild.Id])
+            {
+                loops[ctx.Guild.Id] = false;
+                await ctx.RespondAsync("Looping disabled!");
+            }
+            else
+            {
+                loops[ctx.Guild.Id] = true;
+                await ctx.RespondAsync("Looping enabled!");
+            }
+        }
+
         public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
-            await Task.Delay(2000);
+            await Task.Delay(500);
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
             if (e.Reason == TrackEndReason.Finished || e.Reason == TrackEndReason.Stopped)
+            {
+                if (loops[e.Player.Guild.Id])
+                    await e.Player.PlayAsync(e.Track);
+                else
+                {
+                    if (loops.ContainsKey(e.Player.Guild.Id))
+                    {
+                        loops.Remove(e.Player.Guild.Id);
+                    }
+                }
                 if (!queues[e.Player.Guild.Id].IsEmpty)
                 {
                     queues[e.Player.Guild.Id].TryDequeue(out var track);
@@ -337,6 +418,7 @@ namespace Void_Bot
                     e.Player.PlaybackFinished += Conn_PlaybackFinished;
                     return;
                 }
+            }
 
             try
             {

@@ -59,18 +59,21 @@ namespace Void_Bot
     public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-            try
+            while (true)
             {
-                MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
-            }
-            catch (Exception value)
-            {
-                Console.WriteLine(value);
-                throw;
+                try
+                {
+                    var a = MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+                }
+                catch (Exception value)
+                {
+                    Console.WriteLine(value);
+                    throw;
+                }
             }
         }
 
-        private static async Task MainAsync(string[] args)
+        private static async Task<string> MainAsync(string[] args)
         {
             discord = new DiscordShardedClient(new DiscordConfiguration
             {
@@ -229,7 +232,7 @@ namespace Void_Bot
             }
             else
             {
-                await e.Context.RespondAsync("Incorrect usage of command.\nCommand Help:");
+                await e.Context.RespondAsync("An error occurred! Check the command help and if the error persists please contact `VoidRaven#0042`");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
             e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "Void Bot",

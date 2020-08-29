@@ -296,5 +296,12 @@ namespace Void_Bot
         {
             await fun.Fuckoff(ctx);
         }
+
+        [Command("loop")]
+        [Hidden]
+        public async Task Loop(CommandContext ctx)
+        {
+            await au.Loop(ctx);
+        }
     }
 }

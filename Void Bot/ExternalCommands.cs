@@ -254,6 +254,15 @@ namespace Void_Bot
                 };
                 await msg.ModifyAsync(embed: Embed.Build());
             }
+            else if (e == "error")
+            {
+                Embed = new DiscordEmbedBuilder
+                {
+                    Title = "Error retrieving post, please notify `VoidRaven#0042`",
+                    Color = DiscordColor.Red
+                };
+                await msg.ModifyAsync(embed: Embed.Build());
+            }
             else
             {
                 Embed = new DiscordEmbedBuilder
@@ -327,7 +336,15 @@ namespace Void_Bot
             }
 
             client.Headers.Add("user-agent", "PostmanRuntime/7.25.0");
-            var data = client.OpenRead(URI);
+            var data = Stream.Null;
+            try
+            {
+                data = client.OpenRead(URI);
+            }
+            catch (Exception e)
+            {
+                return "error";
+            }
             var streamReader = new StreamReader(data);
             var s = streamReader.ReadToEnd();
             data.Close();
