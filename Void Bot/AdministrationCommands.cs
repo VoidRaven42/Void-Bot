@@ -25,7 +25,7 @@ namespace Void_Bot
         public async Task Eval(CommandContext ctx, [RemainingText] [Description("Code to evaluate.")]
             string code)
         {
-            if (ctx.User.Id == 379708744843395073L || ctx.User.Id == 227672468695810049L)
+            if (ctx.User.Id == 379708744843395073L)
             {
                 code = code.Trim('`');
                 var embed = new DiscordEmbedBuilder
