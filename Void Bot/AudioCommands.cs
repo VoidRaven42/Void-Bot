@@ -34,7 +34,7 @@ namespace Void_Bot
                 await ctx.RespondAsync("You must be in a voice channel!");
                 return;
             }
-            var conn = node.GetConnection(ctx.Guild);
+            var conn = node.GetGuildConnection(ctx.Guild);
             if (conn != null)
             {
                 if (conn.IsConnected)
@@ -61,7 +61,7 @@ namespace Void_Bot
                 return;
             }
 
-            var conn = node.GetConnection(ctx.Guild);
+            var conn = node.GetGuildConnection(ctx.Guild);
 
             if (conn == null)
             {
@@ -100,10 +100,10 @@ namespace Void_Bot
             }
 
             var node = Lavalink;
-            var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
+            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
 
             if (conn == null) await Join(ctx);
-            conn = node.GetConnection(ctx.Guild);
+            conn = node.GetGuildConnection(ctx.Guild);
             var loadResult = await node.Rest.GetTracksAsync(search);
 
             if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed ||
@@ -152,7 +152,7 @@ namespace Void_Bot
             }
 
             var node = Lavalink;
-            var conn = node.GetConnection(ctx.Member.VoiceState.Guild);
+            var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
 
             if (conn.CurrentState.CurrentTrack == null)
             {
@@ -192,7 +192,7 @@ namespace Void_Bot
                 return;
             }
 
-            var conn = node.GetConnection(ctx.Guild);
+            var conn = node.GetGuildConnection(ctx.Guild);
 
 
             if (conn == null)
@@ -222,7 +222,7 @@ namespace Void_Bot
                 return;
             }
 
-            var conn = node.GetConnection(ctx.Guild);
+            var conn = node.GetGuildConnection(ctx.Guild);
 
 
             if (conn == null)
@@ -255,7 +255,7 @@ namespace Void_Bot
                 return;
             }
 
-            var conn = node.GetConnection(ctx.Guild);
+            var conn = node.GetGuildConnection(ctx.Guild);
 
 
             if (conn == null)
@@ -292,7 +292,7 @@ namespace Void_Bot
                     Color = DiscordColor.Azure
                 };
                 var node = Lavalink;
-                var conn = node.GetConnection(ctx.Guild);
+                var conn = node.GetGuildConnection(ctx.Guild);
                 embed.AddField("Currently Playing",
                     conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
                 var i = 1;
@@ -323,7 +323,7 @@ namespace Void_Bot
         public async Task NowPlaying(CommandContext ctx)
         {
             var node = Lavalink;
-            var conn = node.GetConnection(ctx.Guild);
+            var conn = node.GetGuildConnection(ctx.Guild);
             var embed = new DiscordEmbedBuilder
             {
                 Title = "Now Playing",
@@ -352,8 +352,7 @@ namespace Void_Bot
                 return;
             }
 
-            var conn = node.GetConnection(ctx.Guild);
-
+            var conn = node.GetGuildConnection(ctx.Guild);
 
             if (conn == null)
             {
@@ -398,7 +397,7 @@ namespace Void_Bot
 
         public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
-            await Task.Delay(500);
+            await Task.Delay(1000);
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
             if (e.Reason == TrackEndReason.Finished || e.Reason == TrackEndReason.Stopped)
             {

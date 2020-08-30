@@ -16,6 +16,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
+using Microsoft.Extensions.Logging;
 
 namespace Void_Bot
 {
@@ -79,8 +80,7 @@ namespace Void_Bot
             {
                 Token = token,
                 TokenType = TokenType.Bot,
-                UseInternalLogHandler = true,
-                LogLevel = LogLevel.Info
+                ReconnectIndefinitely = true
             });
             
             Lavalink = await discord.UseLavalinkAsync();
@@ -235,7 +235,7 @@ namespace Void_Bot
                 await e.Context.RespondAsync("An error occurred! Check the command help and if the error persists please contact `VoidRaven#0042`");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
-            e.Context.Client.DebugLogger.LogMessage(LogLevel.Error, "Void Bot",
+            e.Context.Client.Logger.Log(LogLevel.Error, "Void Bot",
                 string.Format("User '{0}#{1}' ({2}) tried to execute '{3}' ", e.Context.User.Username,
                     e.Context.User.Discriminator, e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>") +
                 $"in #{e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}) and failed with {e.Exception.GetType()}: {e.Exception.Message}",
@@ -245,7 +245,7 @@ namespace Void_Bot
 
         private static async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
         {
-            discord.DebugLogger.LogMessage(LogLevel.Info, "Void Bot",
+            discord.Logger.Log(LogLevel.Information, "Void Bot",
                 e.Context.Guild == null
                     ? $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in (a DM channel))."
                     : $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}).",
