@@ -306,7 +306,7 @@ namespace Void_Bot
                 {
                     await ctx.RespondAsync(embed: embed);
                 }
-                catch (ArgumentException e)
+                catch (ArgumentException)
                 {
                     await ctx.RespondAsync(
                         $"Queue is too long to display, it has {queues[ctx.Guild.Id].Count} tracks in it.");

@@ -124,12 +124,6 @@ namespace Void_Bot
         [Description("Gets one of the top 100 hot posts on r/eyebleach")]
         public async Task Eyebleach(CommandContext ctx)
         {
-            var random = new Random();
-            var rtoken = File.ReadAllText("reddittoken.txt");
-            var refresh = File.ReadAllText("refresh.txt");
-            var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
-            var sub = reddit.Subreddit("eyebleach").About();
-            var hot = sub.Posts.Hot;
             Post img = null;
             var embed = new DiscordEmbedBuilder
             {
@@ -137,6 +131,14 @@ namespace Void_Bot
                 Color = DiscordColor.Yellow
             };
             var msg = await ctx.RespondAsync(embed: embed.Build());
+
+            var random = new Random();
+            var rtoken = File.ReadAllText("reddittoken.txt");
+            var refresh = File.ReadAllText("refresh.txt");
+            var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
+            var sub = reddit.Subreddit("eyebleach").About();
+            var hot = sub.Posts.Hot;
+            
             for (var i = 0; i < 1000; i++)
             {
                 img = hot[random.Next(0, 99)];

@@ -6,16 +6,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
+using HSNXT.DSharpPlus.ModernEmbedBuilder;
 using Microsoft.Extensions.Logging;
 
 namespace Void_Bot
@@ -27,14 +30,6 @@ namespace Void_Bot
         private static readonly string token = File.ReadAllText("token.txt");
 
         public static bool customstatus = false;
-
-        private static readonly List<string> bannedwords = new List<string>
-        {
-            "aidan  not cute", "aidan not cute", "a idan not cute", "aidan no t cute", "aiidan not cute",
-            "aaiidaan not cuute", "aidan ulge", "aidan not cu te", "aidan ugle", "aidan n o t cute",
-            "aidan is not cute", "aidanugly", "aidan ugly", "ai dan not cute", "aidan is uncute", "aidann not cute",
-            "aidan is ugle", "a i d a n  n o t  c u t e"
-        };
 
         public static IReadOnlyDictionary<int, CommandsNextExtension> Commands { get; set; }
 
@@ -57,7 +52,7 @@ namespace Void_Bot
             SocketEndpoint = endpoint
         };
 
-    public static void Main(string[] args)
+        public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
             while (true)
@@ -102,6 +97,7 @@ namespace Void_Bot
 
             foreach (var commands in Commands.Values)
             {
+                commands.SetHelpFormatter<HelpFormatter>();
                 commands.RegisterCommands<Commands>();
                 commands.RegisterCommands<UtilityCommands>();
                 commands.RegisterCommands<AudioCommands>();
@@ -122,6 +118,7 @@ namespace Void_Bot
                 { 
                     AudioCommands.Lavalink = await extension.ConnectAsync(lavalinkConfig);
                 }
+                discord.Logger.Log(LogLevel.Information,"Connected to Lavalink!");
             }
             catch (Exception ex)
             {
@@ -177,14 +174,7 @@ namespace Void_Bot
         }
 
         private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
-        {
-            if (!(e.Guild == null) && e.Guild.Id.ToString() == "642067509931147264")
-                foreach (var elem in bannedwords)
-                {
-                    if (!e.Message.Content.ToLower().Contains(elem)) continue;
-                    await e.Message.DeleteAsync();
-                }
-        }
+        {}
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
@@ -235,7 +225,7 @@ namespace Void_Bot
                 await e.Context.RespondAsync("An error occurred! Check the command help and if the error persists please contact `VoidRaven#0042`");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
-            e.Context.Client.Logger.Log(LogLevel.Error, "Void Bot",
+            e.Context.Client.Logger.Log(LogLevel.Error, 
                 string.Format("User '{0}#{1}' ({2}) tried to execute '{3}' ", e.Context.User.Username,
                     e.Context.User.Discriminator, e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>") +
                 $"in #{e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}) and failed with {e.Exception.GetType()}: {e.Exception.Message}",
@@ -245,7 +235,7 @@ namespace Void_Bot
 
         private static async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
         {
-            discord.Logger.Log(LogLevel.Information, "Void Bot",
+            discord.Logger.Log(LogLevel.Information, 
                 e.Context.Guild == null
                     ? $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in (a DM channel))."
                     : $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}).",
