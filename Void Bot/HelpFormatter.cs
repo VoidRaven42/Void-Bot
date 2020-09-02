@@ -28,7 +28,8 @@ namespace Void_Bot
             Guild = ctx.Guild;
             EmbedBuilder = new ModernEmbedBuilder()
             {
-                Title = "Command list"
+                Title = "Command list",
+                Color = DiscordColor.Purple
             }.AddGeneratedForFooter(ctx);
         }
         public override BaseHelpFormatter WithCommand(Command command)
