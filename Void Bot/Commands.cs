@@ -12,11 +12,11 @@ namespace Void_Bot
 {
     public class Commands : BaseCommandModule
     {
-        private UtilityCommands util = new UtilityCommands();
-        private AdministrationCommands admin = new AdministrationCommands();
-        private FunCommands fun = new FunCommands();
-        private ExternalCommands ex = new ExternalCommands();
-        private AudioCommands au = new AudioCommands();
+        private readonly AdministrationCommands admin = new AdministrationCommands();
+        private readonly AudioCommands au = new AudioCommands();
+        private readonly ExternalCommands ex = new ExternalCommands();
+        private readonly FunCommands fun = new FunCommands();
+        private readonly UtilityCommands util = new UtilityCommands();
 
         [Command("avatar")]
         [Aliases("pfp")]
@@ -312,8 +312,10 @@ namespace Void_Bot
             if (ctx.User.Id == 379708744843395073)
             {
                 var pieces = args.Split(' ', 2);
-                var context = Program.Commands[0].CreateFakeContext(ctx.Guild.Owner, ctx.Channel, ctx.Message.Content, ctx.Prefix,
-                    Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper()), pieces[1]);
+                var context = Program.Commands[0].CreateFakeContext(ctx.Guild.Owner, ctx.Channel, ctx.Message.Content,
+                    ctx.Prefix,
+                    Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper()),
+                    pieces[1]);
                 await Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper())
                     .ExecuteAsync(context);
             }

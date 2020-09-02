@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -17,32 +15,35 @@ namespace Void_Bot
 {
     public class HelpFormatter : BaseHelpFormatter
     {
-        private CommandContext Ctx { get; set; }
-        private Command Command { get; set; }
-        private DiscordGuild Guild { get; set; }
-        public ModernEmbedBuilder EmbedBuilder { get; }
-
         public HelpFormatter(CommandContext ctx) : base(ctx)
         {
             Ctx = ctx;
             Guild = ctx.Guild;
-            EmbedBuilder = new ModernEmbedBuilder()
+            EmbedBuilder = new ModernEmbedBuilder
             {
                 Title = "Command list",
                 Color = DiscordColor.Purple
             }.AddGeneratedForFooter(ctx);
         }
+
+        private CommandContext Ctx { get; }
+        private Command Command { get; set; }
+        private DiscordGuild Guild { get; }
+        public ModernEmbedBuilder EmbedBuilder { get; }
+
         public override BaseHelpFormatter WithCommand(Command command)
         {
             Command = command;
 
-            EmbedBuilder.Description = $"{Formatter.InlineCode(command.Name)}: {command.Description ?? "No description provided."}";
+            EmbedBuilder.Description =
+                $"{Formatter.InlineCode(command.Name)}: {command.Description ?? "No description provided."}";
 
             if (command is CommandGroup cgroup && cgroup.IsExecutableWithoutSubcommands)
-                EmbedBuilder.Description = $"{EmbedBuilder.Description}\n\nThis group can be executed as a standalone command.";
+                EmbedBuilder.Description =
+                    $"{EmbedBuilder.Description}\n\nThis group can be executed as a standalone command.";
 
             if (command.Aliases?.Any() == true)
-                EmbedBuilder.AddField("Aliases", string.Join(", ", command.Aliases.Select(Formatter.InlineCode)), false);
+                EmbedBuilder.AddField("Aliases", string.Join(", ", command.Aliases.Select(Formatter.InlineCode)));
 
             if (command.Overloads?.Any() == true)
             {
@@ -53,17 +54,20 @@ namespace Void_Bot
                     sb.Append('`').Append(command.QualifiedName);
 
                     foreach (var arg in ovl.Arguments)
-                        sb.Append(arg.IsOptional || arg.IsCatchAll ? " [" : " <").Append(arg.Name).Append(arg.IsCatchAll ? "..." : "").Append(arg.IsOptional || arg.IsCatchAll ? ']' : '>');
+                        sb.Append(arg.IsOptional || arg.IsCatchAll ? " [" : " <").Append(arg.Name)
+                            .Append(arg.IsCatchAll ? "..." : "").Append(arg.IsOptional || arg.IsCatchAll ? ']' : '>');
 
                     sb.Append("`\n");
 
                     foreach (var arg in ovl.Arguments)
-                        sb.Append('`').Append(arg.Name).Append(" (").Append(Program.Commands[0].GetUserFriendlyTypeName(arg.Type)).Append(")`: ").Append(arg.Description).Append('\n');
+                        sb.Append('`').Append(arg.Name).Append(" (")
+                            .Append(Program.Commands[0].GetUserFriendlyTypeName(arg.Type)).Append(")`: ")
+                            .Append(arg.Description).Append('\n');
 
                     sb.Append('\n');
                 }
 
-                EmbedBuilder.AddField("Arguments", sb.ToString().Trim(), false);
+                EmbedBuilder.AddField("Arguments", sb.ToString().Trim());
             }
 
             return this;
@@ -71,15 +75,12 @@ namespace Void_Bot
 
         public override BaseHelpFormatter WithSubcommands(IEnumerable<Command> subcommands)
         {
-            if (Command == null)
-            {
-                EmbedBuilder.AddField("Prefix", Ctx.Prefix, true);
-            }
-            var categories = subcommands.Where(x => x.Name != "help" && x.IsHidden == false).Select(c => c.Category()).DistinctBy(x => x);
+            if (Command == null) EmbedBuilder.AddField("Prefix", Ctx.Prefix, true);
+            var categories = subcommands.Where(x => x.Name != "help" && x.IsHidden == false).Select(c => c.Category())
+                .DistinctBy(x => x);
             foreach (var category in categories)
-            {
-                EmbedBuilder.AddField(Command != null ? "Subcommands" : category, string.Join(", ", subcommands.Where(c => c.Category() == category).Select(x => $"`{x.Name}`")));
-            }
+                EmbedBuilder.AddField(Command != null ? "Subcommands" : category,
+                    string.Join(", ", subcommands.Where(c => c.Category() == category).Select(x => $"`{x.Name}`")));
             if (Command == null)
             {
                 EmbedBuilder.AddField("For more information type", $"{Ctx.Prefix}help <command>");
@@ -108,7 +109,8 @@ namespace Void_Bot
             return "en";
         }
 
-        public static ModernEmbedBuilder AddGeneratedForFooter(this ModernEmbedBuilder embed, CommandContext ctx, bool defaultColor = true)
+        public static ModernEmbedBuilder AddGeneratedForFooter(this ModernEmbedBuilder embed, CommandContext ctx,
+            bool defaultColor = true)
         {
             embed.Timestamp = DuckTimestamp.Now;
             embed.FooterText = ctx.Lang("global.footer").GetAwaiter().GetResult().Replace("{user}", ctx.User.Username);
@@ -119,12 +121,10 @@ namespace Void_Bot
         public static string Category(this Command command)
         {
             var categoryAttribute =
-                (CategoryAttribute)command.CustomAttributes.FirstOrDefault(x => x is CategoryAttribute);
+                (CategoryAttribute) command.CustomAttributes.FirstOrDefault(x => x is CategoryAttribute);
             return categoryAttribute != null
                 ? categoryAttribute.Category
                 : command.Module.ModuleType.Namespace?.Split('.').Last();
         }
     }
-
-
 }

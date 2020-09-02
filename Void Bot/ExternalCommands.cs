@@ -73,14 +73,12 @@ namespace Void_Bot
                 img = hot[random.Next(0, hot.Count - 1)];
                 if (img.Listing.SelfText != "") break;
                 if (img.Listing.URL.Contains("gifv") ||
-                    !img.Listing.URL.Contains("i.redd.it") && !img.Listing.URL.Contains("i.imgur.com") ||
-                    !img.Listing.URL.Contains("png")) continue;
+                    !img.Listing.URL.Contains("i.redd.it") && !img.Listing.URL.Contains("i.imgur.com")) continue;
                 if (!img.Listing.Over18 || allownsfw && img.Listing.Over18) break;
             }
 
             if ((img.Listing.URL.Contains("gifv") ||
-                 !img.Listing.URL.Contains("i.redd.it") && !img.Listing.URL.Contains("i.imgur.com") ||
-                 !img.Listing.URL.Contains("png")) && img.Listing.SelfText == "")
+                 !img.Listing.URL.Contains("i.redd.it") && !img.Listing.URL.Contains("i.imgur.com")) && img.Listing.SelfText == "")
             {
                 await ctx.RespondAsync("No valid post could be found, please try again.");
                 return;

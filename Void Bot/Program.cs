@@ -1,24 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
-using HSNXT.DSharpPlus.ModernEmbedBuilder;
 using Microsoft.Extensions.Logging;
 
 namespace Void_Bot
@@ -30,14 +26,6 @@ namespace Void_Bot
         private static readonly string token = File.ReadAllText("token.txt");
 
         public static bool customstatus = false;
-
-        public static IReadOnlyDictionary<int, CommandsNextExtension> Commands { get; set; }
-
-        public static IReadOnlyDictionary<int, LavalinkExtension> Lavalink { get; set; }
-
-        public static Dictionary<int, LavalinkNodeConnection> LavalinkNodes { get; set; }
-
-        public static IReadOnlyDictionary<int, InteractivityExtension> Interactivity { get; set; }
 
         public static ConnectionEndpoint endpoint = new ConnectionEndpoint
         {
@@ -52,11 +40,18 @@ namespace Void_Bot
             SocketEndpoint = endpoint
         };
 
+        public static IReadOnlyDictionary<int, CommandsNextExtension> Commands { get; set; }
+
+        public static IReadOnlyDictionary<int, LavalinkExtension> Lavalink { get; set; }
+
+        public static Dictionary<int, LavalinkNodeConnection> LavalinkNodes { get; set; }
+
+        public static IReadOnlyDictionary<int, InteractivityExtension> Interactivity { get; set; }
+
         public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
             while (true)
-            {
                 try
                 {
                     var a = MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -66,7 +61,6 @@ namespace Void_Bot
                     Console.WriteLine(value);
                     throw;
                 }
-            }
         }
 
         private static async Task<string> MainAsync(string[] args)
@@ -77,7 +71,7 @@ namespace Void_Bot
                 TokenType = TokenType.Bot,
                 ReconnectIndefinitely = true
             });
-            
+
             Lavalink = await discord.UseLavalinkAsync();
 
             var icfg = new InteractivityConfiguration
@@ -115,10 +109,8 @@ namespace Void_Bot
             try
             {
                 foreach (var extension in Lavalink.Values)
-                { 
                     AudioCommands.Lavalink = await extension.ConnectAsync(lavalinkConfig);
-                }
-                discord.Logger.Log(LogLevel.Information,"Connected to Lavalink!");
+                discord.Logger.Log(LogLevel.Information, "Connected to Lavalink!");
             }
             catch (Exception ex)
             {
@@ -135,9 +127,8 @@ namespace Void_Bot
                 {
                     var amount = 0;
                     foreach (var elem in discord.ShardClients.Values)
-                    {
-                        foreach (var guild in elem.Guilds) amount += guild.Value.Members.Values.Count(x => !x.IsBot);
-                    }
+                    foreach (var guild in elem.Guilds)
+                        amount += guild.Value.Members.Values.Count(x => !x.IsBot);
                     var status = amount + " users";
                     var activity = new DiscordActivity(status, ActivityType.Watching);
                     await discord.UpdateStatusAsync(activity);
@@ -148,38 +139,33 @@ namespace Void_Bot
                 if (!customstatus)
                 {
                     var amount = 0;
-                    foreach (var elem in discord.ShardClients.Values)
-                    {
-                        amount += elem.Guilds.Count;
-                    }
+                    foreach (var elem in discord.ShardClients.Values) amount += elem.Guilds.Count;
 
                     var status = amount + " servers";
                     var activity = new DiscordActivity(status, ActivityType.Watching);
                     await discord.UpdateStatusAsync(activity);
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(1)); 
-                
+                await Task.Delay(TimeSpan.FromMinutes(1));
+
                 if (!customstatus)
-                {
                     foreach (var elem in discord.ShardClients.Values)
                     {
-                        var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}", ActivityType.Watching);
+                        var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}",
+                            ActivityType.Watching);
                         await discord.UpdateStatusAsync(activity);
                     }
-                }
 
                 await Task.Delay(TimeSpan.FromMinutes(1));
             }
         }
 
         private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
-        {}
+        {
+        }
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
-
-            
             DiscordEmbedBuilder embed = null;
             var ex = e.Exception;
             while (ex is AggregateException) ex = ex.InnerException;
@@ -200,20 +186,30 @@ namespace Void_Bot
             }
             else if (!(ex is ArgumentException) && !ex.Message.Equals("Specified command was not found."))
             {
-                embed = !(ex is ChecksFailedException)
-                    ? new DiscordEmbedBuilder
-                    {
-                        Title = "A problem occured while executing the command",
-                        Description =
-                            $"{Formatter.InlineCode(e.Command.QualifiedName)} threw an exception: `{ex.GetType()}: {ex.Message}`",
-                        Color = new DiscordColor(16711680)
-                    }
-                    : new DiscordEmbedBuilder
+                if (ex is ChecksFailedException)
+                {
+                    embed = new DiscordEmbedBuilder
                     {
                         Title = "Permission denied",
                         Description = "You lack permissions necessary to run this command.",
                         Color = new DiscordColor(16711680)
                     };
+                }
+                else
+                {
+                    await e.Context.RespondAsync(
+                        "An error occurred! Check the command help and if the error persists please contact `VoidRaven#0042`");
+                    embed = new DiscordEmbedBuilder
+                    {
+                        Title = "A problem occured while executing the command",
+                        Description =
+                            $"{Formatter.InlineCode(e.Command.QualifiedName)} threw an exception: `{ex.GetType()}: {ex.Message}`",
+                        Color = new DiscordColor(16711680)
+                    };
+                    var guild = await e.Context.Client.GetGuildAsync(750409700750786632);
+                    await guild.GetChannel(750787712625410208).SendMessageAsync(embed: embed);
+                }
+                
             }
             else if (ex.Message.Equals("Specified command was not found."))
             {
@@ -222,10 +218,21 @@ namespace Void_Bot
             }
             else
             {
-                await e.Context.RespondAsync("An error occurred! Check the command help and if the error persists please contact `VoidRaven#0042`");
+                await e.Context.RespondAsync(
+                    "An error occurred! Check the command help and if the error persists please contact `VoidRaven#0042`");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
+                embed = new DiscordEmbedBuilder
+                {
+                    Title = "A problem occured while executing the command",
+                    Description =
+                        $"{Formatter.InlineCode(e.Command.QualifiedName)} threw an exception: `{ex.GetType()}: {ex.Message}`",
+                    Color = new DiscordColor(16711680)
+                };
+                var guild = await e.Context.Client.GetGuildAsync(750409700750786632);
+                await guild.GetChannel(750787712625410208).SendMessageAsync(embed: embed);
             }
-            e.Context.Client.Logger.Log(LogLevel.Error, 
+
+            e.Context.Client.Logger.Log(LogLevel.Error,
                 string.Format("User '{0}#{1}' ({2}) tried to execute '{3}' ", e.Context.User.Username,
                     e.Context.User.Discriminator, e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>") +
                 $"in #{e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}) and failed with {e.Exception.GetType()}: {e.Exception.Message}",
@@ -235,7 +242,7 @@ namespace Void_Bot
 
         private static async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
         {
-            discord.Logger.Log(LogLevel.Information, 
+            discord.Logger.Log(LogLevel.Information,
                 e.Context.Guild == null
                     ? $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in (a DM channel))."
                     : $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}).",
@@ -259,10 +266,7 @@ namespace Void_Bot
         private static void OnProcessExit(object sender, EventArgs e)
         {
             Console.WriteLine("Disconnecting from all shards, then exiting in 2 seconds");
-            foreach (var elem in discord.ShardClients.Values)
-            {
-                elem.DisconnectAsync();
-            }
+            foreach (var elem in discord.ShardClients.Values) elem.DisconnectAsync();
             Thread.Sleep(2000);
         }
 
@@ -283,10 +287,8 @@ namespace Void_Bot
             }
 
             if (msg.Channel.Guild != null)
-            {
                 if (guildprefixes.ContainsKey(msg.Channel.Guild.Id.ToString()))
                     customPrefix[1] = guildprefixes[msg.Channel.Guild.Id.ToString()];
-            }
             var argPos = msg.GetMentionPrefixLength(discord.CurrentUser);
             if (customPrefix[1] == null)
             {
