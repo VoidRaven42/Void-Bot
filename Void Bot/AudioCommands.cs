@@ -89,6 +89,12 @@ namespace Void_Bot
             await Play(ctx, "https://www.youtube.com/watch?v=cerkDJLuT_k");
         }
 
+        [Command("amemory")]
+        public async Task Amemory(CommandContext ctx)
+        {
+            await Play(ctx, "https://www.youtube.com/watch?v=CWutV6yO7Wo");
+        }
+
         [Command]
         public async Task Play(CommandContext ctx, [RemainingText] string search)
         {
@@ -126,7 +132,7 @@ namespace Void_Bot
                 {
                     queues[ctx.Guild.Id].Enqueue(result);
                     await ctx.RespondAsync(
-                        $"A track was already playing, the requested track ( {result.Title}, {"https://youtu.be/" + result.Uri.ToString()[^11..]} ) has been added to the queue!");
+                        $"A track was already playing, the requested track ( {result.Title}, `{"https://youtu.be/" + result.Uri.ToString()[^11..]}` ) has been added to the queue!");
                     return;
                 }
             }
@@ -137,7 +143,7 @@ namespace Void_Bot
             }
 
             await ctx.RespondAsync(
-                    $"Now playing {result.Title} by {result.Author} ( {"https://youtu.be/" + result.Uri.ToString()[^11..]} )!")
+                    $"Now playing {result.Title} by {result.Author} (`{"https://youtu.be/" + result.Uri.ToString()[^11..]}`)!")
                 .ConfigureAwait(false);
             conn.PlaybackFinished += Conn_PlaybackFinished;
         }

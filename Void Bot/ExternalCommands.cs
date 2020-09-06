@@ -90,11 +90,10 @@ namespace Void_Bot
                 embed = new DiscordEmbedBuilder
                 {
                     Title = img.Title + " [Textpost]",
-                    Url = "https://www.reddit.com/" + img.Permalink,
                     Color = DiscordColor.Aquamarine
                 };
                 embed.AddField("Subreddit", "r/" + subreddit);
-                embed.AddField("Link:", "https://www.reddit.com" + img.Permalink);
+                embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
                 await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
@@ -105,11 +104,11 @@ namespace Void_Bot
                 embed = new DiscordEmbedBuilder
                 {
                     Title = img.Title,
-                    Url = "https://www.reddit.com" + img.Permalink,
                     Color = DiscordColor.Aquamarine,
                     ImageUrl = img.Listing.URL
                 };
                 embed.AddField("Subreddit", "r/" + subreddit);
+                embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
                 await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
@@ -156,6 +155,7 @@ namespace Void_Bot
                 ImageUrl = img.Listing.URL
             };
             await msg.ModifyAsync(embed: embed.Build());
+            embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
             EBArray[EBElem] = img.Listing.URL;
             EBElem += 1;
             if (EBElem == 20) EBElem = 0;
@@ -206,11 +206,10 @@ namespace Void_Bot
                 {
                     Title = "Post Retrieved",
                     Color = DiscordColor.Aquamarine,
-                    ImageUrl = img,
-                    Url = direct
+                    ImageUrl = img
                 };
                 Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
-                Embed.AddField("Direct Link", direct);
+                Embed.AddField("Link:", $"[Direct Link]({direct})");
                 await msg.ModifyAsync(embed: Embed.Build());
                 E6Array[E6Elem] = img;
                 E6Elem += 1;

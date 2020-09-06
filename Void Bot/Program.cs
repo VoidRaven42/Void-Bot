@@ -51,19 +51,18 @@ namespace Void_Bot
         public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-            while (true)
-                try
-                {
-                    var a = MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
-                }
-                catch (Exception value)
-                {
-                    Console.WriteLine(value);
-                    throw;
-                }
+            
+            try
+            {
+                MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            catch (Exception value)
+            {
+                Console.WriteLine(value);
+            }
         }
 
-        private static async Task<string> MainAsync(string[] args)
+        private static async Task MainAsync(string[] args)
         {
             discord = new DiscordShardedClient(new DiscordConfiguration
             {
@@ -123,40 +122,47 @@ namespace Void_Bot
             await Task.Delay(2000);
             while (true)
             {
-                if (!customstatus)
+                try
                 {
-                    var amount = 0;
-                    foreach (var elem in discord.ShardClients.Values)
-                    foreach (var guild in elem.Guilds)
-                        amount += guild.Value.Members.Values.Count(x => !x.IsBot);
-                    var status = amount + " users";
-                    var activity = new DiscordActivity(status, ActivityType.Watching);
-                    await discord.UpdateStatusAsync(activity);
-                }
-
-                await Task.Delay(TimeSpan.FromMinutes(1));
-
-                if (!customstatus)
-                {
-                    var amount = 0;
-                    foreach (var elem in discord.ShardClients.Values) amount += elem.Guilds.Count;
-
-                    var status = amount + " servers";
-                    var activity = new DiscordActivity(status, ActivityType.Watching);
-                    await discord.UpdateStatusAsync(activity);
-                }
-
-                await Task.Delay(TimeSpan.FromMinutes(1));
-
-                if (!customstatus)
-                    foreach (var elem in discord.ShardClients.Values)
+                    if (!customstatus)
                     {
-                        var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}",
-                            ActivityType.Watching);
+                        var amount = 0;
+                        foreach (var elem in discord.ShardClients.Values)
+                        foreach (var guild in elem.Guilds)
+                            amount += guild.Value.Members.Values.Count(x => !x.IsBot);
+                        var status = amount + " users";
+                        var activity = new DiscordActivity(status, ActivityType.Watching);
                         await discord.UpdateStatusAsync(activity);
                     }
 
-                await Task.Delay(TimeSpan.FromMinutes(1));
+                    await Task.Delay(TimeSpan.FromMinutes(1));
+
+                    if (!customstatus)
+                    {
+                        var amount = 0;
+                        foreach (var elem in discord.ShardClients.Values) amount += elem.Guilds.Count;
+
+                        var status = amount + " servers";
+                        var activity = new DiscordActivity(status, ActivityType.Watching);
+                        await discord.UpdateStatusAsync(activity);
+                    }
+
+                    await Task.Delay(TimeSpan.FromMinutes(1));
+
+                    if (!customstatus)
+                        foreach (var elem in discord.ShardClients.Values)
+                        {
+                            var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}",
+                                ActivityType.Watching);
+                            await discord.UpdateStatusAsync(activity);
+                        }
+
+                    await Task.Delay(TimeSpan.FromMinutes(1));
+                }
+                catch
+                {
+                    await Task.Delay(1000);
+                }
             }
         }
 
