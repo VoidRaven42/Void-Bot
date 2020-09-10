@@ -28,7 +28,7 @@ namespace Void_Bot
         public static string[] R34Array = new string[20];
         public static int R34Elem;
 
-        public static string[] RedditArray = new string[20];
+        public static string[] RedditArray = new string[35];
         public static int RedditElem;
 
         [Command("reddit")]
@@ -53,7 +53,23 @@ namespace Void_Bot
             }
             catch
             {
-                await ctx.RespondAsync("Subreddit could not be found/accessed, please try another!");
+                embed = new DiscordEmbedBuilder
+                {
+                    Title = "Subreddit could not be found/accessed, please try another!",
+                    Color = DiscordColor.Yellow
+                };
+                await msg.ModifyAsync(embed:embed.Build());
+                return;
+            }
+
+            if (sub.Over18.Value && !ctx.Channel.IsNSFW && !Program.Override)
+            {
+                embed = new DiscordEmbedBuilder
+                {
+                    Title = "This subreddit is marked NSFW, please try again in an NSFW channel.",
+                    Color = DiscordColor.Yellow
+                };
+                await msg.ModifyAsync(embed:embed.Build());
                 return;
             }
 
@@ -61,26 +77,24 @@ namespace Void_Bot
             Post img = null;
             var allownsfw = ctx.Channel.IsNSFW;
 
-            if (sub.Over18.Value && !ctx.Channel.IsNSFW)
-            {
-                await ctx.RespondAsync("This subreddit is marked NSFW, please try again in an NSFW channel.");
-                return;
-            }
-
-
             for (var i = 0; i < 1000; i++)
             {
                 img = hot[random.Next(0, hot.Count - 1)];
                 if (img.Listing.SelfText != "") break;
                 if (img.Listing.URL.Contains("gifv") ||
                     !img.Listing.URL.Contains("i.redd.it") && !img.Listing.URL.Contains("i.imgur.com")) continue;
-                if (!img.Listing.Over18 || allownsfw && img.Listing.Over18) break;
+                if ((!img.Listing.Over18 || allownsfw && img.Listing.Over18 || Program.Override) && !RedditArray.Contains(img.Permalink)) break;
             }
 
             if ((img.Listing.URL.Contains("gifv") ||
                  !img.Listing.URL.Contains("i.redd.it") && !img.Listing.URL.Contains("i.imgur.com")) && img.Listing.SelfText == "")
             {
-                await ctx.RespondAsync("No valid post could be found, please try again.");
+                embed = new DiscordEmbedBuilder
+                {
+                    Title = "No valid post could be found, please try again.",
+                    Color = DiscordColor.Yellow
+                };
+                await msg.ModifyAsync(embed:embed.Build());
                 return;
             }
 
@@ -97,7 +111,7 @@ namespace Void_Bot
                 await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
-                if (RedditElem == 20) RedditElem = 0;
+                if (RedditElem == 35) RedditElem = 0;
             }
             else
             {
@@ -112,7 +126,7 @@ namespace Void_Bot
                 await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
-                if (RedditElem == 20) RedditElem = 0;
+                if (RedditElem == 35) RedditElem = 0;
             }
         }
 
@@ -166,7 +180,7 @@ namespace Void_Bot
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
-            if (!ctx.Channel.IsNSFW)
+            if (!ctx.Channel.IsNSFW && !Program.Override)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
                 Thread.Sleep(1000);
@@ -222,7 +236,7 @@ namespace Void_Bot
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
-            if (!ctx.Channel.IsNSFW)
+            if (!ctx.Channel.IsNSFW && !Program.Override)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
                 Thread.Sleep(1000);
@@ -264,15 +278,39 @@ namespace Void_Bot
             }
             else
             {
-                Embed = new DiscordEmbedBuilder
+                var split = e.Split(' ');
+                if (e.Contains(' '))
                 {
-                    Title = "Post Retrieved",
-                    Color = DiscordColor.Aquamarine,
-                    ImageUrl = e
-                };
-                Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
+
+                    Embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Post Retrieved",
+                        Color = DiscordColor.Aquamarine,
+                        ImageUrl = split[0]
+                    };
+                    Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
+                    Embed.AddField("Link:", $"[Direct Link]({split[1]})");
+                }
+                else
+                {
+                    Embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Post Retrieved",
+                        Color = DiscordColor.Aquamarine,
+                        ImageUrl = e
+                    };
+                    Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
+                }
+
                 await msg.ModifyAsync(embed: Embed.Build());
-                R34Array[R34Elem] = e;
+                if (e.Contains(' '))
+                {
+                    R34Array[R34Elem] = split[0];
+                }
+                else
+                {
+                    R34Array[R34Elem] = e;
+                }
                 R34Elem += 1;
                 if (R34Elem == 20) R34Elem = 0;
             }
@@ -351,10 +389,26 @@ namespace Void_Bot
             var jo = JArray.Parse(s);
             var random = new Random();
             if (jo.Count == 0) return null;
-            var rand = random.Next(0, jo.Count - 1);
+            int rand = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                rand = random.Next(0, jo.Count - 1);
+                if (jo[rand]["source"] != null)
+                {
+                    break;
+                }
+            }
+
+            if (jo[rand]["source"] == null)
+            {
+                return (!(jo[rand]["type"]!.ToString() == "image")
+                    ? jo[rand]["preview_url"]!.ToString()
+                    : jo[rand]["file_url"]!.ToString());
+            }
+
             return !(jo[rand]["type"]!.ToString() == "image")
                 ? jo[rand]["preview_url"]!.ToString()
-                : jo[rand]["file_url"]!.ToString();
+                : jo[rand]["file_url"]!.ToString() + ' ' + jo[rand]["source"];
         }
     }
 }

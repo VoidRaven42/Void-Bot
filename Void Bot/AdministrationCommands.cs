@@ -240,7 +240,7 @@ namespace Void_Bot
                     case "remove":
                     case "none":
 
-                        Program.customstatus = false;
+                        Program.CustomStatus = false;
                         await Program.discord.UpdateStatusAsync();
                         return;
                 }
@@ -273,7 +273,7 @@ namespace Void_Bot
                         return;
                 }
 
-                Program.customstatus = true;
+                Program.CustomStatus = true;
                 await Program.discord.UpdateStatusAsync(activity);
                 await ctx.RespondAsync("Status has been successfully updated");
             }

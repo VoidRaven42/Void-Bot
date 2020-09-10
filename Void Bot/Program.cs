@@ -25,7 +25,9 @@ namespace Void_Bot
 
         private static readonly string token = File.ReadAllText("token.txt");
 
-        public static bool customstatus = false;
+        public static bool CustomStatus = false;
+
+        public static bool Override = false;
 
         public static ConnectionEndpoint endpoint = new ConnectionEndpoint
         {
@@ -124,7 +126,7 @@ namespace Void_Bot
             {
                 try
                 {
-                    if (!customstatus)
+                    if (!CustomStatus)
                     {
                         var amount = 0;
                         foreach (var elem in discord.ShardClients.Values)
@@ -137,7 +139,7 @@ namespace Void_Bot
 
                     await Task.Delay(TimeSpan.FromMinutes(1));
 
-                    if (!customstatus)
+                    if (!CustomStatus)
                     {
                         var amount = 0;
                         foreach (var elem in discord.ShardClients.Values) amount += elem.Guilds.Count;
@@ -149,7 +151,7 @@ namespace Void_Bot
 
                     await Task.Delay(TimeSpan.FromMinutes(1));
 
-                    if (!customstatus)
+                    if (!CustomStatus)
                         foreach (var elem in discord.ShardClients.Values)
                         {
                             var activity = new DiscordActivity($"Shard {elem.ShardId + 1} of {elem.ShardCount}",
@@ -172,6 +174,7 @@ namespace Void_Bot
 
         private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
+            Override = false;
             DiscordEmbedBuilder embed = null;
             var ex = e.Exception;
             while (ex is AggregateException) ex = ex.InnerException;
@@ -214,6 +217,7 @@ namespace Void_Bot
                     };
                     var guild = await e.Context.Client.GetGuildAsync(750409700750786632);
                     await guild.GetChannel(750787712625410208).SendMessageAsync(embed: embed);
+                    return;
                 }
                 
             }
@@ -236,6 +240,7 @@ namespace Void_Bot
                 };
                 var guild = await e.Context.Client.GetGuildAsync(750409700750786632);
                 await guild.GetChannel(750787712625410208).SendMessageAsync(embed: embed);
+                return;
             }
 
             e.Context.Client.Logger.Log(LogLevel.Error,

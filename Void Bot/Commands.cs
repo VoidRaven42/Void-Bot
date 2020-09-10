@@ -5,6 +5,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MoreLinq;
 
 //This file is here to allow easier use of commands, while allowing the help command to remain organised
 
@@ -305,6 +306,13 @@ namespace Void_Bot
             await au.Loop(ctx);
         }
 
+        [Command("amemory")]
+        [Hidden]
+        public async Task Amemory(CommandContext ctx)
+        {
+            await au.Amemory(ctx);
+        }
+
 
         [Command("override")]
         [Hidden]
@@ -312,13 +320,26 @@ namespace Void_Bot
         {
             if (ctx.User.Id == 379708744843395073)
             {
+                Program.Override = true;
                 var pieces = args.Split(' ', 2);
-                var context = Program.Commands[0].CreateFakeContext(ctx.Guild.Owner, ctx.Channel, ctx.Message.Content,
-                    ctx.Prefix,
-                    Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper()),
-                    pieces[1]);
+                CommandContext context = Program.Commands.Values.First()
+                    .CreateContext(ctx.Message, ctx.Prefix, ctx.Command, args);
+                try
+                {
+                    context = Program.Commands.Values.First().CreateFakeContext(ctx.Guild.Owner, ctx.Channel, ctx.Message.Content,
+                        ctx.Prefix,
+                        Program.Commands.Values.First().RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper()),
+                        pieces[1]);
+                }
+                catch (Exception e)
+                {
+                    await ctx.RespondAsync("Command not found.");
+                    return;
+                }
+                
                 await Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper())
                     .ExecuteAsync(context);
+                Program.Override = false;
             }
             else
             {

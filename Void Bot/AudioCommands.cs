@@ -299,6 +299,14 @@ namespace Void_Bot
                 };
                 var node = Lavalink;
                 var conn = node.GetGuildConnection(ctx.Guild);
+                if (queues[ctx.Guild.Id] == null)
+                {
+                    return;
+                }
+                if (queues[ctx.Guild.Id].IsEmpty)
+                {
+                    queues.Remove(ctx.Guild.Id);
+                }
                 embed.AddField("Currently Playing",
                     conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
                 var i = 1;
@@ -403,7 +411,7 @@ namespace Void_Bot
 
         public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
-            await Task.Delay(1000);
+            await Task.Delay(2000);
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
             if (e.Reason == TrackEndReason.Finished || e.Reason == TrackEndReason.Stopped)
             {
