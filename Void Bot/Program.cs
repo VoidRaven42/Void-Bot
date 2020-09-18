@@ -27,7 +27,7 @@ namespace Void_Bot
 
         public static bool CustomStatus = false;
 
-        public static bool Override = false;
+        public static bool Override;
 
         public static ConnectionEndpoint endpoint = new ConnectionEndpoint
         {
@@ -53,7 +53,7 @@ namespace Void_Bot
         public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-            
+
             try
             {
                 MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -116,14 +116,13 @@ namespace Void_Bot
             catch (Exception ex)
             {
                 if (ex is SocketException || ex is HttpRequestException || ex is WebSocketException)
-                    Console.WriteLine("Can't connect to lavalink! (music commands are disabled)");
+                    Console.WriteLine("Can't connect to Lavalink! (music commands are disabled)");
                 else
                     throw;
             }
 
             await Task.Delay(2000);
             while (true)
-            {
                 try
                 {
                     if (!CustomStatus)
@@ -165,7 +164,6 @@ namespace Void_Bot
                 {
                     await Task.Delay(1000);
                 }
-            }
         }
 
         private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
@@ -188,8 +186,10 @@ namespace Void_Bot
             {
                 await e.Context.RespondAsync("Command Help:");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
+                return;
             }
-            else if (ex is InvalidOperationException)
+
+            if (ex is InvalidOperationException)
             {
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
@@ -219,12 +219,12 @@ namespace Void_Bot
                     await guild.GetChannel(750787712625410208).SendMessageAsync(embed: embed);
                     return;
                 }
-                
             }
             else if (ex.Message.Equals("Specified command was not found."))
             {
                 await e.Context.RespondAsync("Specified command was not found.\nCommand Help:");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context);
+                return;
             }
             else
             {
@@ -244,8 +244,7 @@ namespace Void_Bot
             }
 
             e.Context.Client.Logger.Log(LogLevel.Error,
-                string.Format("User '{0}#{1}' ({2}) tried to execute '{3}' ", e.Context.User.Username,
-                    e.Context.User.Discriminator, e.Context.User.Id, e.Command?.QualifiedName ?? "<unknown command>") +
+                $"User '{e.Context.User.Username}#{e.Context.User.Discriminator}' ({e.Context.User.Id}) tried to execute '{e.Command?.QualifiedName ?? "<unknown command>"}' " +
                 $"in #{e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}) and failed with {e.Exception.GetType()}: {e.Exception.Message}",
                 DateTime.Now);
             if (embed != null) await e.Context.RespondAsync("", false, embed.Build());
@@ -255,7 +254,7 @@ namespace Void_Bot
         {
             discord.Logger.Log(LogLevel.Information,
                 e.Context.Guild == null
-                    ? $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in (a DM channel))."
+                    ? $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id} (a DM channel))."
                     : $"{e.Context.User.Username} executed '{e.Command.QualifiedName}' in {e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}).",
                 DateTime.Now);
         }

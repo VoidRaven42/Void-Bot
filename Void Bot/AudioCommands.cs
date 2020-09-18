@@ -34,15 +34,15 @@ namespace Void_Bot
                 await ctx.RespondAsync("You must be in a voice channel!");
                 return;
             }
+
             var conn = node.GetGuildConnection(ctx.Guild);
             if (conn != null)
-            {
                 if (conn.IsConnected)
                 {
                     await ctx.RespondAsync($"Already connected to {conn.Channel}!");
                     return;
                 }
-            }
+
             await node.ConnectAsync(ctx.Member.VoiceState.Channel);
             queues.Add(ctx.Guild.Id, new ConcurrentQueue<LavalinkTrack>());
             loops.Add(ctx.Guild.Id, false);
@@ -98,7 +98,6 @@ namespace Void_Bot
         [Command]
         public async Task Play(CommandContext ctx, [RemainingText] string search)
         {
-
             if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You must be in a voice channel!");
@@ -299,14 +298,8 @@ namespace Void_Bot
                 };
                 var node = Lavalink;
                 var conn = node.GetGuildConnection(ctx.Guild);
-                if (queues[ctx.Guild.Id] == null)
-                {
-                    return;
-                }
-                if (queues[ctx.Guild.Id].IsEmpty)
-                {
-                    queues.Remove(ctx.Guild.Id);
-                }
+                if (queues[ctx.Guild.Id] == null) return;
+                if (queues[ctx.Guild.Id].IsEmpty) queues.Remove(ctx.Guild.Id);
                 embed.AddField("Currently Playing",
                     conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
                 var i = 1;
@@ -416,14 +409,14 @@ namespace Void_Bot
             if (e.Reason == TrackEndReason.Finished || e.Reason == TrackEndReason.Stopped)
             {
                 if (loops[e.Player.Guild.Id])
+                {
                     await e.Player.PlayAsync(e.Track);
+                }
                 else
                 {
-                    if (loops.ContainsKey(e.Player.Guild.Id))
-                    {
-                        loops.Remove(e.Player.Guild.Id);
-                    }
+                    if (loops.ContainsKey(e.Player.Guild.Id)) loops.Remove(e.Player.Guild.Id);
                 }
+
                 if (!queues[e.Player.Guild.Id].IsEmpty)
                 {
                     queues[e.Player.Guild.Id].TryDequeue(out var track);

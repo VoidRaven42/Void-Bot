@@ -100,7 +100,6 @@ namespace Void_Bot
                         });
                         rex = css.Exception;
                     }
-                    
                 }
                 catch (Exception ex)
                 {
@@ -151,6 +150,7 @@ namespace Void_Bot
                 await ctx.RespondAsync("You can't change the prefix of a DM channel!");
                 return;
             }
+
             var array = File.ReadAllLines("prefixes.txt").ToArray();
             var guildprefixes = new Dictionary<string, string>();
             var array2 = array;

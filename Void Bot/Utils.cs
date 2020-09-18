@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -11,10 +8,8 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
-using DSharpPlus.Net.Models;
 using HSNXT.DSharpPlus.ModernEmbedBuilder;
 using MoreLinq;
-using Newtonsoft.Json;
 
 namespace Void_Bot
 {
@@ -87,14 +82,10 @@ namespace Void_Bot
                 EmbedBuilder.AddField(Command != null ? "Subcommands" : category,
                     string.Join(", ", subcommands.Where(c => c.Category() == category).Select(x => $"`{x.Name}`")));
             if (Command == null)
-            {
                 EmbedBuilder.AddField("For more information type", $"{Ctx.Prefix}help <command>", true);
-                //EmbedBuilder.AddField("Support server", "[Join our support server](https://discord.gg/n3ZYNtV)", true);
-            }
+            //EmbedBuilder.AddField("Support server", "[Join our support server](https://discord.gg/n3ZYNtV)", true);
             else
-            {
                 EmbedBuilder.AddField("For more information type", $"{Ctx.Prefix}help {Command.Name} <subcommand>");
-            }
 
             return this;
         }

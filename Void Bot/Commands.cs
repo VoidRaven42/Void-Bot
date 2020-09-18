@@ -5,7 +5,6 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using MoreLinq;
 
 //This file is here to allow easier use of commands, while allowing the help command to remain organised
 
@@ -198,6 +197,15 @@ namespace Void_Bot
             await ex.E621(ctx, tags);
         }
 
+        [Command("e926")]
+        [Aliases("e9")]
+        [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
+        [Hidden]
+        public async Task E926(CommandContext ctx, [RemainingText] string tags)
+        {
+            await ex.E926(ctx, tags);
+        }
+
         [Command("rule34")]
         [Aliases("r34")]
         [Hidden]
@@ -322,13 +330,15 @@ namespace Void_Bot
             {
                 Program.Override = true;
                 var pieces = args.Split(' ', 2);
-                CommandContext context = Program.Commands.Values.First()
+                var context = Program.Commands.Values.First()
                     .CreateContext(ctx.Message, ctx.Prefix, ctx.Command, args);
                 try
                 {
-                    context = Program.Commands.Values.First().CreateFakeContext(ctx.Guild.Owner, ctx.Channel, ctx.Message.Content,
+                    context = Program.Commands.Values.First().CreateFakeContext(ctx.Guild.Owner, ctx.Channel,
+                        ctx.Message.Content,
                         ctx.Prefix,
-                        Program.Commands.Values.First().RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper()),
+                        Program.Commands.Values.First().RegisteredCommands.Values
+                            .First(x => x.Name.ToUpper() == pieces[0].ToUpper()),
                         pieces[1]);
                 }
                 catch (Exception e)
@@ -336,7 +346,7 @@ namespace Void_Bot
                     await ctx.RespondAsync("Command not found.");
                     return;
                 }
-                
+
                 await Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper())
                     .ExecuteAsync(context);
                 Program.Override = false;
