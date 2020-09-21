@@ -48,12 +48,18 @@ namespace Void_Bot
             var refresh = File.ReadAllText("refresh.txt");
             var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
             Subreddit sub = null;
-            var embed = new DiscordEmbedBuilder
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
+            DiscordMessage msg = ctx.Message;
+            if (!RedditCache.ContainsKey(subreddit))
             {
-                Title = "Retrieving Post",
-                Color = DiscordColor.Yellow
-            };
-            var msg = await ctx.RespondAsync(embed: embed.Build());
+                embed = new DiscordEmbedBuilder
+                {
+                    Title = "Retrieving Post",
+                    Color = DiscordColor.Yellow
+                };
+                msg = await ctx.RespondAsync(embed: embed.Build());
+            }
+            
             try
             {
                 sub = reddit.Subreddit(subreddit).About();
@@ -65,7 +71,9 @@ namespace Void_Bot
                     Title = "Subreddit could not be found/accessed, please try another!",
                     Color = DiscordColor.Yellow
                 };
-                await msg.ModifyAsync(embed: embed.Build());
+                msg = RedditCache.ContainsKey(subreddit)
+                    ? await ctx.RespondAsync(embed: embed.Build())
+                    : await msg.ModifyAsync(embed: embed.Build());
                 return;
             }
 
@@ -76,7 +84,9 @@ namespace Void_Bot
                     Title = "This subreddit is marked NSFW, please try again in an NSFW channel.",
                     Color = DiscordColor.Yellow
                 };
-                await msg.ModifyAsync(embed: embed.Build());
+                msg = RedditCache.ContainsKey(subreddit)
+                    ? await ctx.RespondAsync(embed: embed.Build())
+                    : await msg.ModifyAsync(embed: embed.Build());
                 return;
             }
             var hot = new List<Post>();
@@ -111,7 +121,9 @@ namespace Void_Bot
                     Title = "No valid post could be found, please try again.",
                     Color = DiscordColor.Yellow
                 };
-                await msg.ModifyAsync(embed: embed.Build());
+                msg = RedditCache.ContainsKey(subreddit)
+                    ? await ctx.RespondAsync(embed: embed.Build())
+                    : await msg.ModifyAsync(embed: embed.Build());
                 return;
             }
 
@@ -125,7 +137,9 @@ namespace Void_Bot
                 };
                 embed.AddField("Subreddit", "r/" + subreddit);
                 embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
-                await msg.ModifyAsync(embed: embed.Build());
+                msg = RedditCache.ContainsKey(subreddit)
+                    ? await ctx.RespondAsync(embed: embed.Build())
+                    : await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
                 if (RedditElem == 35) RedditElem = 0;
@@ -140,7 +154,9 @@ namespace Void_Bot
                 };
                 embed.AddField("Subreddit", "r/" + subreddit);
                 embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
-                await msg.ModifyAsync(embed: embed.Build());
+                msg = RedditCache.ContainsKey(subreddit)
+                    ? await ctx.RespondAsync(embed: embed.Build())
+                    : await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
                 if (RedditElem == 35) RedditElem = 0;
@@ -152,44 +168,7 @@ namespace Void_Bot
         [Description("Gets one of the top 100 hot posts on r/eyebleach")]
         public async Task Eyebleach(CommandContext ctx)
         {
-            Post img = null;
-            var embed = new DiscordEmbedBuilder
-            {
-                Title = "Retrieving Post",
-                Color = DiscordColor.Yellow
-            };
-            var msg = await ctx.RespondAsync(embed: embed.Build());
-
-            var random = new Random();
-            var rtoken = File.ReadAllText("reddittoken.txt");
-            var refresh = File.ReadAllText("refresh.txt");
-            var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
-            var sub = reddit.Subreddit("eyebleach").About();
-            var hot = sub.Posts.Hot;
-
-            for (var i = 0; i < 1000; i++)
-            {
-                img = hot[random.Next(0, 99)];
-                if (!img.Listing.URL.Contains("gifv") && img.Listing.URL.Contains("i.redd.it")) break;
-            }
-
-            if (img.Listing.URL.Contains("gifv") || !img.Listing.URL.Contains("i.redd.it"))
-            {
-                await ctx.RespondAsync("No valid post could be found, please try again.");
-                return;
-            }
-
-            embed = new DiscordEmbedBuilder
-            {
-                Title = "Post Retrieved",
-                Color = DiscordColor.Aquamarine,
-                ImageUrl = img.Listing.URL
-            };
-            await msg.ModifyAsync(embed: embed.Build());
-            embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
-            EBArray[EBElem] = img.Listing.URL;
-            EBElem += 1;
-            if (EBElem == 20) EBElem = 0;
+            Reddit(ctx, "eyebleach");
         }
 
         [Command("e621")]
@@ -209,13 +188,18 @@ namespace Void_Bot
                 await ctx.Channel.DeleteMessagesAsync(messages2);
                 return;
             }
-
-            var Embed = new DiscordEmbedBuilder
+            var Embed = new DiscordEmbedBuilder();
+            DiscordMessage msg = ctx.Message;
+            if (!E6Cache.ContainsKey(tags))
             {
-                Title = "Retrieving Post",
-                Color = DiscordColor.Yellow
-            };
-            var msg = await ctx.RespondAsync(embed: Embed.Build());
+                Embed = new DiscordEmbedBuilder
+                {
+                    Title = "Retrieving Post",
+                    Color = DiscordColor.Yellow
+                };
+                msg = await ctx.RespondAsync(embed: Embed.Build());
+            }
+            
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
             var e = await E6HttpGet("https://e621.net/posts.json", tagssplit.ToArray(), tags);
@@ -226,7 +210,9 @@ namespace Void_Bot
                     Title = "No results found!",
                     Color = DiscordColor.Red
                 };
-                await msg.ModifyAsync(embed: Embed.Build());
+                msg = E6Cache.ContainsKey(tags)
+                    ? await ctx.RespondAsync(embed: Embed.Build())
+                    : await msg.ModifyAsync(embed: Embed.Build());
             }
             else
             {
@@ -242,7 +228,9 @@ namespace Void_Bot
                 Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                 Embed.AddField("Link:", $"[Direct Link]({direct})");
                 Embed.WithFooter("No image? Try clicking the link");
-                await msg.ModifyAsync(embed: Embed.Build());
+                msg = msg == ctx.Message
+                    ? await ctx.RespondAsync(embed: Embed.Build())
+                    : await msg.ModifyAsync(embed: Embed.Build());
                 E6Array[E6Elem] = img;
                 E6Elem += 1;
                 if (E6Elem == 20) E6Elem = 0;
@@ -254,12 +242,17 @@ namespace Void_Bot
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task E926(CommandContext ctx, [RemainingText] string tags)
         {
-            var Embed = new DiscordEmbedBuilder
+            var Embed = new DiscordEmbedBuilder();
+            var msg = ctx.Message;
+            if (!E9Cache.ContainsKey(tags))
             {
-                Title = "Retrieving Post",
-                Color = DiscordColor.Yellow
-            };
-            var msg = await ctx.RespondAsync(embed: Embed.Build());
+                Embed = new DiscordEmbedBuilder
+                {
+                    Title = "Retrieving Post",
+                    Color = DiscordColor.Yellow
+                };
+                msg = await ctx.RespondAsync(embed: Embed.Build());
+            }
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
             var e = await E9HttpGet("https://e926.net/posts.json", tagssplit.ToArray(), tags);
@@ -270,7 +263,9 @@ namespace Void_Bot
                     Title = "No results found!",
                     Color = DiscordColor.Red
                 };
-                await msg.ModifyAsync(embed: Embed.Build());
+                msg = E9Cache.ContainsKey(tags)
+                    ? await ctx.RespondAsync(embed: Embed.Build())
+                    : await msg.ModifyAsync(embed: Embed.Build());
             }
             else
             {
@@ -286,7 +281,9 @@ namespace Void_Bot
                 Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                 Embed.AddField("Link:", $"[Direct Link]({direct})");
                 Embed.WithFooter("No image? Try clicking the link");
-                await msg.ModifyAsync(embed: Embed.Build());
+                msg = msg == ctx.Message
+                    ? await ctx.RespondAsync(embed: Embed.Build())
+                    : await msg.ModifyAsync(embed: Embed.Build());
                 E9Array[E9Elem] = img;
                 E9Elem += 1;
                 if (E9Elem == 20) E9Elem = 0;
@@ -311,12 +308,18 @@ namespace Void_Bot
                 return;
             }
 
-            var Embed = new DiscordEmbedBuilder
+            var Embed = new DiscordEmbedBuilder();
+            var msg = ctx.Message;
+
+            if (!R34Cache.ContainsKey(tags))
             {
-                Title = "Retrieving Post",
-                Color = DiscordColor.Yellow
-            };
-            var msg = await ctx.RespondAsync(embed: Embed.Build());
+                Embed = new DiscordEmbedBuilder
+                {
+                    Title = "Retrieving Post",
+                    Color = DiscordColor.Yellow
+                };
+                msg = await ctx.RespondAsync(embed: Embed.Build());
+            }
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
             var e = await R34HttpGet("https://r34-json-api.herokuapp.com/posts", tagssplit.ToArray(), tags);
@@ -327,7 +330,9 @@ namespace Void_Bot
                     Title = "No results found!",
                     Color = DiscordColor.Red
                 };
-                await msg.ModifyAsync(embed: Embed.Build());
+                msg = R34Cache.ContainsKey(tags)
+                    ? await ctx.RespondAsync(embed: Embed.Build())
+                    : await msg.ModifyAsync(embed: Embed.Build());
             }
             else if (e == "error")
             {
@@ -336,7 +341,9 @@ namespace Void_Bot
                     Title = "Error retrieving post, please notify `VoidRaven#0042`",
                     Color = DiscordColor.Red
                 };
-                await msg.ModifyAsync(embed: Embed.Build());
+                msg = R34Cache.ContainsKey(tags)
+                    ? await ctx.RespondAsync(embed: Embed.Build())
+                    : await msg.ModifyAsync(embed: Embed.Build());
             }
             else
             {
@@ -364,7 +371,9 @@ namespace Void_Bot
                     Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                 }
 
-                await msg.ModifyAsync(embed: Embed.Build());
+                msg = msg == ctx.Message
+                    ? await ctx.RespondAsync(embed: Embed.Build())
+                    : await msg.ModifyAsync(embed: Embed.Build());
                 if (e.Contains(' '))
                     R34Array[R34Elem] = split[0];
                 else
@@ -518,11 +527,11 @@ namespace Void_Bot
             }
 
             if (jo[rand]["source"] == null)
-                return !(jo[rand]["type"]!.ToString() == "image")
+                return (jo[rand]["type"]!.ToString() != "image")
                     ? jo[rand]["preview_url"]!.ToString()
                     : jo[rand]["file_url"]!.ToString();
 
-            return !(jo[rand]["type"]!.ToString() == "image")
+            return jo[rand]["type"]!.ToString() != "image"
                 ? jo[rand]["preview_url"]!.ToString()
                 : jo[rand]["file_url"]!.ToString() + ' ' + jo[rand]["source"];
         }

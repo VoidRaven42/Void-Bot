@@ -321,6 +321,25 @@ namespace Void_Bot
             await au.Amemory(ctx);
         }
 
+        [Command]
+        [Aliases("ma")]
+        [RequirePermissions(Permissions.MuteMembers)]
+        [Hidden]
+        public async Task MuteAll(CommandContext ctx)
+        {
+            await au.MuteAll(ctx);
+        }
+
+        [Command]
+        [Aliases("uma")]
+        [RequirePermissions(Permissions.MuteMembers)]
+        [Hidden]
+
+        public async Task UnMuteAll(CommandContext ctx)
+        {
+            await au.UnMuteAll(ctx);
+        }
+
 
         [Command("override")]
         [Hidden]

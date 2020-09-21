@@ -402,6 +402,31 @@ namespace Void_Bot
             }
         }
 
+        [Command]
+        [Aliases("ma")]
+        [RequirePermissions(Permissions.MuteMembers)]
+        public async Task MuteAll(CommandContext ctx)
+        {
+            foreach (var elem in ctx.Member.VoiceState.Channel.Users)
+            {
+                await elem.SetMuteAsync(true);
+            }
+            await ctx.RespondAsync("All members muted!");
+        }
+
+        [Command]
+        [Aliases("uma")]
+        [RequirePermissions(Permissions.MuteMembers)]
+
+        public async Task UnMuteAll(CommandContext ctx)
+        {
+            foreach (var elem in ctx.Member.VoiceState.Channel.Users)
+            {
+                await elem.SetMuteAsync(false);
+            }
+            await ctx.RespondAsync("All members unmuted!");
+        }
+
         public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
