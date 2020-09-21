@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
@@ -66,6 +67,9 @@ namespace Void_Bot
 
         private static async Task MainAsync(string[] args)
         {
+            var DayTask = new System.Timers.Timer(43200000); //12 hours in ms
+            DayTask.Elapsed += DayEvent;
+            DayTask.Start();
             discord = new DiscordShardedClient(new DiscordConfiguration
             {
                 Token = token,
@@ -166,6 +170,13 @@ namespace Void_Bot
                 }
         }
 
+        private static void DayEvent(object source, ElapsedEventArgs e)
+        {
+            ExternalCommands.RedditCache.Clear();
+            ExternalCommands.E6Cache.Clear();
+            ExternalCommands.E9Cache.Clear();
+            ExternalCommands.R34Cache.Clear();
+        }
         private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
         {
         }

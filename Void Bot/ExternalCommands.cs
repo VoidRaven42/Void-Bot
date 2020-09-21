@@ -21,18 +21,22 @@ namespace Void_Bot
     {
         public static string[] E6Array = new string[20];
         public static int E6Elem;
+        public static Dictionary<string, string> E6Cache = new Dictionary<string, string>();
 
         public static string[] E9Array = new string[20];
         public static int E9Elem;
-
-        public static string[] EBArray = new string[20];
-        public static int EBElem;
+        public static Dictionary<string, string> E9Cache = new Dictionary<string, string>();
 
         public static string[] R34Array = new string[20];
         public static int R34Elem;
+        public static Dictionary<string, string> R34Cache = new Dictionary<string, string>();
 
         public static string[] RedditArray = new string[35];
         public static int RedditElem;
+        public static Dictionary<string, List<Post>> RedditCache = new Dictionary<string, List<Post>>();
+
+        public static string[] EBArray = new string[20];
+        public static int EBElem;
 
         [Command("reddit")]
         [Aliases("rd")]
@@ -75,8 +79,16 @@ namespace Void_Bot
                 await msg.ModifyAsync(embed: embed.Build());
                 return;
             }
-
-            var hot = sub.Posts.Hot;
+            var hot = new List<Post>();
+            if (RedditCache.ContainsKey(subreddit))
+            {
+                hot = RedditCache[subreddit];
+            }
+            else
+            {
+                hot = sub.Posts.Hot;
+                RedditCache.Add(subreddit, hot);
+            }
             Post img = null;
             var allownsfw = ctx.Channel.IsNSFW;
 
@@ -206,7 +218,7 @@ namespace Void_Bot
             var msg = await ctx.RespondAsync(embed: Embed.Build());
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
-            var e = await E6HttpGet("https://e621.net/posts.json", tagssplit.ToArray());
+            var e = await E6HttpGet("https://e621.net/posts.json", tagssplit.ToArray(), tags);
             if (e == null)
             {
                 Embed = new DiscordEmbedBuilder
@@ -250,7 +262,7 @@ namespace Void_Bot
             var msg = await ctx.RespondAsync(embed: Embed.Build());
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
-            var e = await E9HttpGet("https://e926.net/posts.json", tagssplit.ToArray());
+            var e = await E9HttpGet("https://e926.net/posts.json", tagssplit.ToArray(), tags);
             if (e == null)
             {
                 Embed = new DiscordEmbedBuilder
@@ -307,7 +319,7 @@ namespace Void_Bot
             var msg = await ctx.RespondAsync(embed: Embed.Build());
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
-            var e = await R34HttpGet("https://r34-json-api.herokuapp.com/posts", tagssplit.ToArray());
+            var e = await R34HttpGet("https://r34-json-api.herokuapp.com/posts", tagssplit.ToArray(), tags);
             if (e == null)
             {
                 Embed = new DiscordEmbedBuilder
@@ -362,23 +374,32 @@ namespace Void_Bot
             }
         }
 
-        public async Task<string> E6HttpGet(string URI, string[] tags)
+        public async Task<string> E6HttpGet(string URI, string[] tags, string rawtags)
         {
-            var client = new WebClient();
-            if (tags != null)
+            string s;
+            if (E6Cache.ContainsKey(rawtags))
             {
-                var tagstring = "";
-                foreach (var elem in tags) tagstring = tagstring + elem + "+";
-                URI = URI + "?tags=" + tagstring + "order:score";
-                URI += "&limit=50";
+                s = E6Cache[rawtags];
             }
+            else
+            {
+                var client = new WebClient();
+                if (tags != null)
+                {
+                    var tagstring = "";
+                    foreach (var elem in tags) tagstring = tagstring + elem + "+";
+                    URI = URI + "?tags=" + tagstring + "order:score";
+                    URI += "&limit=50";
+                }
 
-            client.Headers.Add("user-agent", "VoidBot/1.0 (by nevardiov)");
-            var data = client.OpenRead(URI);
-            var streamReader = new StreamReader(data);
-            var s = streamReader.ReadToEnd();
-            data.Close();
-            streamReader.Close();
+                client.Headers.Add("user-agent", "VoidBot/1.0 (by nevardiov)");
+                var data = client.OpenRead(URI);
+                var streamReader = new StreamReader(data);
+                s = streamReader.ReadToEnd();
+                data.Close();
+                streamReader.Close();
+                E6Cache.Add(rawtags, s);
+            }
             var jo = JObject.Parse(s);
             var random = new Random();
             if (!jo["posts"].Any()) return null;
@@ -394,27 +415,35 @@ namespace Void_Bot
                 break;
             }
 
-            if (img.EndsWith("webm") || img.EndsWith("swf")) img = null;
             return img + '|' + url;
         }
 
-        public async Task<string> E9HttpGet(string URI, string[] tags)
+        public async Task<string> E9HttpGet(string URI, string[] tags, string rawtags)
         {
-            var client = new WebClient();
-            if (tags != null)
+            string s;
+            if (E9Cache.ContainsKey(rawtags))
             {
-                var tagstring = "";
-                foreach (var elem in tags) tagstring = tagstring + elem + "+";
-                URI = URI + "?tags=" + tagstring + "order:score";
-                URI += "&limit=50";
+                s = E9Cache[rawtags];
             }
+            else
+            {
+                var client = new WebClient();
+                if (tags != null)
+                {
+                    var tagstring = "";
+                    foreach (var elem in tags) tagstring = tagstring + elem + "+";
+                    URI = URI + "?tags=" + tagstring + "order:score";
+                    URI += "&limit=50";
+                }
 
-            client.Headers.Add("user-agent", "VoidBot/1.0 (by nevardiov)");
-            var data = client.OpenRead(URI);
-            var streamReader = new StreamReader(data);
-            var s = streamReader.ReadToEnd();
-            data.Close();
-            streamReader.Close();
+                client.Headers.Add("user-agent", "VoidBot/1.0 (by nevardiov)");
+                var data = client.OpenRead(URI);
+                var streamReader = new StreamReader(data);
+                s = streamReader.ReadToEnd();
+                data.Close();
+                streamReader.Close();
+                E9Cache.Add(rawtags, s);
+            }
             var jo = JObject.Parse(s);
             var random = new Random();
             if (!jo["posts"].Any()) return null;
@@ -430,11 +459,10 @@ namespace Void_Bot
                 break;
             }
 
-            if (img.EndsWith("webm") || img.EndsWith("swf")) img = null;
             return img + '|' + url;
         }
 
-        public async Task<string> R34HttpGet(string URI, string[] tags)
+        public async Task<string> R34HttpGet(string URI, string[] tags, string rawtags)
         {
             var array = tags;
             for (var i = 0; i < array.Length; i++)
@@ -444,32 +472,41 @@ namespace Void_Bot
                     tags = tagslist.Where(val => val.ToLower() != "order:score").ToArray();
                 }
 
-            var client = new WebClient();
-            if (tags != null)
+            string s;
+            if (R34Cache.ContainsKey(rawtags))
             {
-                var tagstring = "";
-                array = tags;
-                foreach (var elem in array) tagstring = tagstring + elem + "+";
-                var trimmed = tagstring.TrimEnd('+');
-                URI = URI + "?tags=" + trimmed;
-                URI += "&limit=50";
+                s = R34Cache[rawtags];
             }
+            else
+            {
+                var client = new WebClient();
+                if (tags != null)
+                {
+                    var tagstring = "";
+                    array = tags;
+                    foreach (var elem in array) tagstring = tagstring + elem + "+";
+                    var trimmed = tagstring.TrimEnd('+');
+                    URI = URI + "?tags=" + trimmed;
+                    URI += "&limit=50";
+                }
 
-            client.Headers.Add("user-agent", "PostmanRuntime/7.25.0");
-            var data = Stream.Null;
-            try
-            {
-                data = client.OpenRead(URI);
-            }
-            catch (Exception e)
-            {
-                return "error";
-            }
+                client.Headers.Add("user-agent", "PostmanRuntime/7.25.0");
+                var data = Stream.Null;
+                try
+                {
+                    data = client.OpenRead(URI);
+                }
+                catch (Exception e)
+                {
+                    return "error";
+                }
 
-            var streamReader = new StreamReader(data);
-            var s = streamReader.ReadToEnd();
-            data.Close();
-            streamReader.Close();
+                var streamReader = new StreamReader(data);
+                s = streamReader.ReadToEnd();
+                data.Close();
+                streamReader.Close();
+                R34Cache.Add(rawtags, s);
+            }
             var jo = JArray.Parse(s);
             var random = new Random();
             if (jo.Count == 0) return null;
