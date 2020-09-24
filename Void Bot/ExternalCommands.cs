@@ -71,7 +71,7 @@ namespace Void_Bot
                     Title = "Subreddit could not be found/accessed, please try another!",
                     Color = DiscordColor.Yellow
                 };
-                msg = RedditCache.ContainsKey(subreddit)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: embed.Build())
                     : await msg.ModifyAsync(embed: embed.Build());
                 return;
@@ -84,7 +84,7 @@ namespace Void_Bot
                     Title = "This subreddit is marked NSFW, please try again in an NSFW channel.",
                     Color = DiscordColor.Yellow
                 };
-                msg = RedditCache.ContainsKey(subreddit)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: embed.Build())
                     : await msg.ModifyAsync(embed: embed.Build());
                 return;
@@ -121,7 +121,7 @@ namespace Void_Bot
                     Title = "No valid post could be found, please try again.",
                     Color = DiscordColor.Yellow
                 };
-                msg = RedditCache.ContainsKey(subreddit)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: embed.Build())
                     : await msg.ModifyAsync(embed: embed.Build());
                 return;
@@ -137,7 +137,7 @@ namespace Void_Bot
                 };
                 embed.AddField("Subreddit", "r/" + subreddit);
                 embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
-                msg = RedditCache.ContainsKey(subreddit)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: embed.Build())
                     : await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
@@ -154,7 +154,7 @@ namespace Void_Bot
                 };
                 embed.AddField("Subreddit", "r/" + subreddit);
                 embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
-                msg = RedditCache.ContainsKey(subreddit)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: embed.Build())
                     : await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
@@ -168,7 +168,7 @@ namespace Void_Bot
         [Description("Gets one of the top 100 hot posts on r/eyebleach")]
         public async Task Eyebleach(CommandContext ctx)
         {
-            Reddit(ctx, "eyebleach");
+            await Reddit(ctx, "eyebleach");
         }
 
         [Command("e621")]
@@ -210,7 +210,7 @@ namespace Void_Bot
                     Title = "No results found!",
                     Color = DiscordColor.Red
                 };
-                msg = E6Cache.ContainsKey(tags)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: Embed.Build())
                     : await msg.ModifyAsync(embed: Embed.Build());
             }
@@ -263,7 +263,7 @@ namespace Void_Bot
                     Title = "No results found!",
                     Color = DiscordColor.Red
                 };
-                msg = E9Cache.ContainsKey(tags)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: Embed.Build())
                     : await msg.ModifyAsync(embed: Embed.Build());
             }
@@ -330,7 +330,7 @@ namespace Void_Bot
                     Title = "No results found!",
                     Color = DiscordColor.Red
                 };
-                msg = R34Cache.ContainsKey(tags)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: Embed.Build())
                     : await msg.ModifyAsync(embed: Embed.Build());
             }
@@ -341,7 +341,7 @@ namespace Void_Bot
                     Title = "Error retrieving post, please notify `VoidRaven#0042`",
                     Color = DiscordColor.Red
                 };
-                msg = R34Cache.ContainsKey(tags)
+                msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: Embed.Build())
                     : await msg.ModifyAsync(embed: Embed.Build());
             }
@@ -418,12 +418,13 @@ namespace Void_Bot
             {
                 var num = random.Next(0, jo["posts"].Count() - 1);
                 img = jo["posts"][num]["file"]["url"].ToString();
-                var Break = !img.Contains("webm") && !img.Contains("swf") && !E6Array.Contains(img);
+                var Break = !img.Contains("swf") && !E6Array.Contains(img);
                 if (!Break) continue;
                 url = url + jo["posts"][num]["id"];
                 break;
             }
 
+            if (img.Contains("swf")) return null;
             return img + '|' + url;
         }
 
@@ -462,12 +463,13 @@ namespace Void_Bot
             {
                 var num = random.Next(0, jo["posts"].Count() - 1);
                 img = jo["posts"][num]["file"]["url"].ToString();
-                var Break = !img.Contains("webm") && !img.Contains("swf") && !E9Array.Contains(img);
+                var Break = !img.Contains("swf") && !E6Array.Contains(img);
                 if (!Break) continue;
                 url = url + jo["posts"][num]["id"];
                 break;
             }
 
+            if (img.Contains("swf")) return null;
             return img + '|' + url;
         }
 

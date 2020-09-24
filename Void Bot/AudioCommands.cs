@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -9,6 +11,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
+using DSharpPlus.VoiceNext;
+using Google.Cloud.TextToSpeech.V1;
 
 namespace Void_Bot
 {
@@ -407,24 +411,127 @@ namespace Void_Bot
         [RequirePermissions(Permissions.MuteMembers)]
         public async Task MuteAll(CommandContext ctx)
         {
-            foreach (var elem in ctx.Member.VoiceState.Channel.Users)
-            {
-                await elem.SetMuteAsync(true);
-            }
+            foreach (var elem in ctx.Member.VoiceState.Channel.Users) await elem.SetMuteAsync(true);
             await ctx.RespondAsync("All members muted!");
         }
 
         [Command]
         [Aliases("uma")]
         [RequirePermissions(Permissions.MuteMembers)]
-
         public async Task UnMuteAll(CommandContext ctx)
         {
-            foreach (var elem in ctx.Member.VoiceState.Channel.Users)
-            {
-                await elem.SetMuteAsync(false);
-            }
+            foreach (var elem in ctx.Member.VoiceState.Channel.Users) await elem.SetMuteAsync(false);
             await ctx.RespondAsync("All members unmuted!");
+        }
+
+        [Command]
+        [Aliases("tts")]
+        public async Task TextToSpeech(CommandContext ctx, [RemainingText] string inputstring)
+        {
+            var chn = ctx.Member.VoiceState.Channel;
+            if (chn == null)
+            {
+                await ctx.RespondAsync("You must be in a voice channel!");
+                return;
+            }
+
+            var vnext = ctx.Client.GetVoiceNext();
+            var vnc = vnext.GetConnection(ctx.Guild);
+
+            var msg = await ctx.RespondAsync(embed: new DiscordEmbedBuilder
+            {
+                Title = "Processing audio...",
+                Color = DiscordColor.Yellow
+            });
+            var client = await new TextToSpeechClientBuilder
+                {CredentialsPath = "Void Bot TTS-4af47ad6a178.json"}.BuildAsync();
+            var input = new SynthesisInput
+            {
+                Text = inputstring
+            };
+
+            var voice = new VoiceSelectionParams
+            {
+                LanguageCode = "fr",
+                SsmlGender = SsmlVoiceGender.Neutral
+            };
+
+            var config = new AudioConfig
+            {
+                AudioEncoding = AudioEncoding.Linear16
+            };
+
+            var response = new SynthesizeSpeechResponse();
+
+            try
+            {
+                response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
+                {
+                    Input = input,
+                    Voice = voice,
+                    AudioConfig = config
+                });
+            }
+            catch (Exception e)
+            {
+                await msg.ModifyAsync(embed: new DiscordEmbedBuilder
+                {
+                    Title = "Error occurred in processing audio! (Was your request too long?)",
+                    Color = DiscordColor.Red
+                }.Build());
+
+                return;
+            }
+
+            if (vnc != null)
+            {
+                await msg.ModifyAsync(embed: new DiscordEmbedBuilder
+                {
+                    Title = "Please wait for the previous statement to finish!",
+                    Color = DiscordColor.Red
+                }.Build());
+                return;
+            }
+
+            var time = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
+
+            using (Stream output = File.Create($"Temp/{time}.mp3"))
+            {
+                response.AudioContent.WriteTo(output);
+                Console.WriteLine("Audio content successfully written to file");
+            }
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = $@"-i ""Temp/{time + ".mp3"}"" -ac 2 -f s16le -ar 48000 pipe:1",
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            };
+            var ffmpeg = Process.Start(psi);
+            var ffout = ffmpeg.StandardOutput.BaseStream;
+            if (vnc == null)
+                try
+                {
+                    vnc = await chn.ConnectAsync();
+                }
+                catch (Exception e)
+                {
+                    // ignored
+                }
+
+            await msg.ModifyAsync(embed: new DiscordEmbedBuilder
+            {
+                Title = "Sending audio!",
+                Color = DiscordColor.Green
+            }.Build());
+            var txStream = vnc.GetTransmitStream();
+            await ffout.CopyToAsync(txStream);
+            await txStream.FlushAsync();
+            File.Delete($"Temp/{time}.mp3");
+            await vnc.WaitForPlaybackFinishAsync();
+            vnc.Disconnect();
+            GC.Collect();
         }
 
         public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)

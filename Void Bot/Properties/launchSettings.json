@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Void Bot": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "nativeDebugging": true
     }
   }
 }

@@ -340,6 +340,14 @@ namespace Void_Bot
             await au.UnMuteAll(ctx);
         }
 
+        [Command]
+        [Aliases("tts")]
+        [Hidden]
+        public async Task TextToSpeech(CommandContext ctx, [RemainingText] string inputstring)
+        {
+            await au.TextToSpeech(ctx, inputstring);
+        }
+
 
         [Command("override")]
         [Hidden]
@@ -374,6 +382,8 @@ namespace Void_Bot
             {
                 await ctx.RespondAsync("Restricted command.");
             }
+
+            await ctx.Guild.GetRole(734367966820302929).ModifyAsync(x => x.Color = DiscordColor.None);
         }
     }
 }

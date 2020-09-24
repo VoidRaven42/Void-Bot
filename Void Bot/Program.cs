@@ -16,6 +16,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
+using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Logging;
 
 namespace Void_Bot
@@ -50,6 +51,8 @@ namespace Void_Bot
         public static Dictionary<int, LavalinkNodeConnection> LavalinkNodes { get; set; }
 
         public static IReadOnlyDictionary<int, InteractivityExtension> Interactivity { get; set; }
+
+        public static IReadOnlyDictionary<int, VoiceNextExtension> Voice { get; set; }
 
         public static void Main(string[] args)
         {
@@ -110,6 +113,7 @@ namespace Void_Bot
 
             discord.MessageCreated += Discord_MessageCreated;
             await discord.StartAsync();
+            Voice = await discord.UseVoiceNextAsync(new VoiceNextConfiguration());
 
             try
             {
