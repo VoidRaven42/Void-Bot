@@ -227,7 +227,7 @@ namespace Void_Bot
                     {
                         Title = "A problem occured while executing the command",
                         Description =
-                            $"{Formatter.InlineCode(e.Command.QualifiedName)} threw an exception: `{ex.GetType()}: {ex.Message}`",
+                            $"{Formatter.InlineCode(e.Command.QualifiedName)} threw an exception:\n {ex}",
                         Color = new DiscordColor(16711680)
                     };
                     var guild = await e.Context.Client.GetGuildAsync(750409700750786632);

@@ -428,12 +428,13 @@ namespace Void_Bot
         [Aliases("tts")]
         public async Task TextToSpeech(CommandContext ctx, [RemainingText] string inputstring)
         {
-            var chn = ctx.Member.VoiceState.Channel;
-            if (chn == null)
+            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
             {
                 await ctx.RespondAsync("You must be in a voice channel!");
                 return;
             }
+
+            var chn = ctx.Member.VoiceState.Channel;
 
             var vnext = ctx.Client.GetVoiceNext();
             var vnc = vnext.GetConnection(ctx.Guild);
@@ -452,7 +453,7 @@ namespace Void_Bot
 
             var voice = new VoiceSelectionParams
             {
-                LanguageCode = "fr",
+                LanguageCode = "en-US",
                 SsmlGender = SsmlVoiceGender.Neutral
             };
 
@@ -487,15 +488,15 @@ namespace Void_Bot
             {
                 await msg.ModifyAsync(embed: new DiscordEmbedBuilder
                 {
-                    Title = "Please wait for the previous statement to finish!",
-                    Color = DiscordColor.Red
+                    Title = "Waiting for previous playback to finish",
+                    Color = DiscordColor.Orange
                 }.Build());
-                return;
+                await vnc.WaitForPlaybackFinishAsync();
             }
 
             var time = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
-            using (Stream output = File.Create($"Temp/{time}.mp3"))
+            using (Stream output = File.Create($"D:/Temp/{time}.mp3"))
             {
                 response.AudioContent.WriteTo(output);
                 Console.WriteLine("Audio content successfully written to file");
@@ -504,10 +505,11 @@ namespace Void_Bot
             var psi = new ProcessStartInfo
             {
                 FileName = "ffmpeg",
-                Arguments = $@"-i ""Temp/{time + ".mp3"}"" -ac 2 -f s16le -ar 48000 pipe:1",
+                Arguments = $@"-i ""D:/Temp/{time + ".mp3"}"" -ac 2 -f s16le -ar 48000 pipe:1",
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
+
             var ffmpeg = Process.Start(psi);
             var ffout = ffmpeg.StandardOutput.BaseStream;
             if (vnc == null)
@@ -520,18 +522,26 @@ namespace Void_Bot
                     // ignored
                 }
 
+            var txStream = vnc.GetTransmitStream();
+
             await msg.ModifyAsync(embed: new DiscordEmbedBuilder
             {
                 Title = "Sending audio!",
                 Color = DiscordColor.Green
             }.Build());
-            var txStream = vnc.GetTransmitStream();
+
             await ffout.CopyToAsync(txStream);
             await txStream.FlushAsync();
-            File.Delete($"Temp/{time}.mp3");
+
+            File.Delete($"D:/Temp/{time}.mp3");
+
             await vnc.WaitForPlaybackFinishAsync();
-            vnc.Disconnect();
-            GC.Collect();
+
+            await Task.Delay(5000);
+            if (!vnc.IsPlaying)
+            {
+                vnc.Disconnect();
+            }
         }
 
         public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)

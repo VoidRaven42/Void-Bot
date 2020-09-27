@@ -22,7 +22,7 @@ namespace Void_Bot
         [Aliases("pfp")]
         [Description("Takes the username or id and returns the pfp in high quality.")]
         [Hidden]
-        public async Task Avatar(CommandContext ctx, DiscordUser usr)
+        public async Task Avatar(CommandContext ctx, [RemainingText] DiscordUser usr)
         {
             await util.Avatar(ctx, usr);
         }

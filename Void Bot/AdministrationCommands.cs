@@ -174,7 +174,7 @@ namespace Void_Bot
 
         [Command("purge")]
         [Aliases("clear")]
-        [Description("Clears messages, up to 100 at a time")]
+        [Description("Clears messages, with no limit")]
         [RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeAsync(CommandContext ctx, [Description("The amount of messages to purge")]
             int amount)
@@ -186,23 +186,36 @@ namespace Void_Bot
             }
 
             await ctx.Channel.DeleteMessageAsync(ctx.Message);
-            if ((amount - amount % 100) / 100 <= 1)
+            if (amount <= 100)
             {
                 var messages = await ctx.Channel.GetMessagesAsync(amount);
                 await ctx.Channel.DeleteMessagesAsync(messages);
             }
             else
             {
-                await ctx.RespondAsync("Cannot purge more than 100 messages!");
-                //for (var i = 0; i < (amount - amount % 100) / 100; i++)
-                //{
-                //    if ()
-                //}
-            }
+                var total = 0;
+                IReadOnlyList<DiscordMessage> msgs = new List<DiscordMessage>();
+                for (var i = 0; i < (amount - amount % 100) / 100 + 1; i++)
+                {
+                    if (i == (amount - amount % 100) / 100)
+                    {
+                        msgs = await ctx.Channel.GetMessagesAsync(amount % 100);
+                        if(msgs.Count == 0) break;
+                        total += msgs.Count;
+                        await ctx.Channel.DeleteMessagesAsync(msgs);
+                    }
+                    else
+                    {
+                        msgs = await ctx.Channel.GetMessagesAsync();
+                        if (msgs.Count == 0) break;
+                        total += msgs.Count;
+                        await ctx.Channel.DeleteMessagesAsync(msgs);
+                    }
 
-            var obj = await ctx.Channel.SendMessageAsync($"{amount} messages have been deleted!");
-            Thread.Sleep(1000);
-            await obj.DeleteAsync();
+                    await Task.Delay(1000);
+                }
+                var msg = await ctx.RespondAsync($"{total} messages deleted!");
+            }
         }
 
         [Command("send")]

@@ -15,8 +15,9 @@ namespace Void_Bot
         [Command("avatar")]
         [Aliases("pfp")]
         [Description("Takes the username or id and returns the pfp in high quality.")]
-        public async Task Avatar(CommandContext ctx, DiscordUser usr)
+        public async Task Avatar(CommandContext ctx, [RemainingText] DiscordUser usr)
         {
+            if (usr == null) usr = ctx.User;
             var embed = new DiscordEmbedBuilder
             {
                 Title = "User Avatar",
