@@ -9,6 +9,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -174,7 +175,7 @@ namespace Void_Bot
 
         [Command("purge")]
         [Aliases("clear")]
-        [Description("Clears messages, with no limit")]
+        [Description("Clears messages, up to 214748347")]
         [RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeAsync(CommandContext ctx, [Description("The amount of messages to purge")]
             int amount)
@@ -193,14 +194,32 @@ namespace Void_Bot
             }
             else
             {
+                await ctx.RespondAsync( $"Are you sure you want to delete {amount} messages? (Deletion will take around {Math.Floor(Convert.ToDouble(amount) / 100) * 2} seconds)\nConfirm by responding \"y\" or \"n\".");
+                var interactivity = ctx.Client.GetInteractivity();
+                var responsemsg = await interactivity.WaitForMessageAsync(
+                    xm => xm.Author == ctx.User &&
+                          (xm.Content.ToLower().Contains("y") || xm.Content.ToLower().Contains("n")),
+                    TimeSpan.FromSeconds(20.0));
+                if (responsemsg.Result == null)
+                {
+                    await ctx.RespondAsync("Response timed out");
+                }
+                else if (responsemsg.Result.Content.ToLower() == "n")
+                {
+                    await ctx.RespondAsync("Deletion cancelled.");
+                    return;
+                }
+
+                amount += 2;
                 var total = 0;
                 IReadOnlyList<DiscordMessage> msgs = new List<DiscordMessage>();
+
                 for (var i = 0; i < (amount - amount % 100) / 100 + 1; i++)
                 {
                     if (i == (amount - amount % 100) / 100)
                     {
                         msgs = await ctx.Channel.GetMessagesAsync(amount % 100);
-                        if(msgs.Count == 0) break;
+                        if (msgs.Count == 0) break;
                         total += msgs.Count;
                         await ctx.Channel.DeleteMessagesAsync(msgs);
                     }
@@ -212,7 +231,7 @@ namespace Void_Bot
                         await ctx.Channel.DeleteMessagesAsync(msgs);
                     }
 
-                    await Task.Delay(1000);
+                    await Task.Delay(2000);
                 }
                 var msg = await ctx.RespondAsync($"{total} messages deleted!");
             }

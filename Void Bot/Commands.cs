@@ -48,7 +48,7 @@ namespace Void_Bot
 
         [Command("purge")]
         [Aliases("clear")]
-        [Description("Clears messages, up to 100 at a time")]
+        [Description("Clears messages, up to 214748347")]
         [RequirePermissions(Permissions.ManageMessages)]
         [Hidden]
         public async Task PurgeAsync(CommandContext ctx, [Description("The amount of messages to purge")]

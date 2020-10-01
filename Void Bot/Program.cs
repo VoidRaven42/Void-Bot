@@ -197,7 +197,7 @@ namespace Void_Bot
                 return;
             }
 
-            if (ex is ArgumentException && e.Context.RawArgumentString == "")
+            if (ex is ArgumentException)
             {
                 await e.Context.RespondAsync("Command Help:");
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
@@ -208,7 +208,7 @@ namespace Void_Bot
             {
                 await new CommandsNextExtension.DefaultHelpModule().DefaultHelpAsync(e.Context, e.Command.Name);
             }
-            else if (!(ex is ArgumentException) && !ex.Message.Equals("Specified command was not found."))
+            else if (!ex.Message.Equals("Specified command was not found."))
             {
                 if (ex is ChecksFailedException)
                 {
