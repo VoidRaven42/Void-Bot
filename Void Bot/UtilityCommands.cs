@@ -26,5 +26,23 @@ namespace Void_Bot
             };
             await ctx.RespondAsync(embed: embed);
         }
+        
+        [Command("roll")]
+        [Aliases("dice")]
+        public async Task Roll(CommandContext ctx, [RemainingText] string input)
+        {
+          try
+          {
+            var dice = input.Split('+');
+            foreach (var die in dice)
+            {
+              
+            }
+          }
+          catch (Exception e)
+          {
+            await ctx.RespondAsync("Invalid input!");
+          }
+        }
     }
 }
