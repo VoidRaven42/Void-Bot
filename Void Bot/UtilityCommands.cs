@@ -1,5 +1,5 @@
 using System;
-using System.Numerics;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -26,23 +26,83 @@ namespace Void_Bot
             };
             await ctx.RespondAsync(embed: embed);
         }
-        
+
         [Command("roll")]
         [Aliases("dice")]
+        [Description("Takes an input of dice notation, (\"2d20 + 6d6 + 1d2\"), and returns the result of all the rolls")]
         public async Task Roll(CommandContext ctx, [RemainingText] string input)
         {
-          try
-          {
-            var dice = input.Split('+');
-            foreach (var die in dice)
+            try
             {
-              
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "Rolls",
+                    Color = DiscordColor.Green
+                };
+                var dice = input.Split('+');
+                var output = new List<string>();
+                var totalrolls = 0;
+                var totnum = 0;
+                for (var index = 1; index <= dice.Length; index++)
+                {
+                    var die = dice[index - 1];
+                    var args = die.Trim().Split("d");
+                    var num = int.Parse(args[0]);
+                    var sides = int.Parse(args[1]);
+                    totnum += num;
+                }
+
+                for (var index = 1; index <= dice.Length; index++)
+                {
+                    var die = dice[index - 1];
+                    var args = die.Trim().Split("d");
+                    var num = int.Parse(args[0]);
+                    var sides = int.Parse(args[1]);
+
+                    if (totnum <= 24)
+                    {
+                        for (var i = 0; i < num; i++)
+                        {
+                            var rand = new Random().Next(1, sides + 1);
+                            totalrolls += rand;
+                            embed.AddField($"Dice {i+1} (d{args[1]})", rand.ToString(), true);
+                        }
+                    }
+                    else
+                    {
+                        for (var i = 0; i < num; i++)
+                        {
+                            var rand = new Random().Next(1, sides + 1);
+                            totalrolls += rand;
+                            output.Add($"(d{sides}) " + rand);
+                        }
+                    }
+
+                }
+
+                if (output.Count == 0)
+                {
+                    embed.AddField("Total", totalrolls.ToString());
+                    await ctx.RespondAsync(embed: embed);
+                }
+                else
+                {
+                    var msgcontent = "";
+                    foreach (var elem in output)
+                    {
+                        msgcontent += elem + ", ";
+                    }
+
+                    msgcontent = msgcontent.Trim(',', ' ');
+                    msgcontent += $"\n\nTotal: {totalrolls}";
+                    await ctx.RespondAsync(msgcontent);
+                }
+
             }
-          }
-          catch (Exception e)
-          {
-            await ctx.RespondAsync("Invalid input!");
-          }
+            catch (Exception e)
+            {
+                await ctx.RespondAsync("Invalid input!");
+            }
         }
     }
 }

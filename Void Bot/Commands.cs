@@ -348,6 +348,15 @@ namespace Void_Bot
             await au.TextToSpeech(ctx, inputstring);
         }
 
+        [Command("roll")]
+        [Aliases("dice")]
+        [Description("Takes an input of dice notation, (\"2d20 + 6d6 + 1d2\"), and returns the result of all the rolls")]
+        [Hidden]
+        public async Task Roll(CommandContext ctx, [RemainingText] string input)
+        {
+            await util.Roll(ctx, input);
+        }
+
 
         [Command("override")]
         [Hidden]

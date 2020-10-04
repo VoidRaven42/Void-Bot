@@ -18,6 +18,7 @@ using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
 using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Logging;
+using Timer = System.Timers.Timer;
 
 namespace Void_Bot
 {
@@ -70,7 +71,7 @@ namespace Void_Bot
 
         private static async Task MainAsync(string[] args)
         {
-            var DayTask = new System.Timers.Timer(43200000); //12 hours in ms
+            var DayTask = new Timer(43200000); //12 hours in ms
             DayTask.Elapsed += DayEvent;
             DayTask.Start();
             discord = new DiscordShardedClient(new DiscordConfiguration
@@ -227,7 +228,7 @@ namespace Void_Bot
                     {
                         Title = "A problem occured while executing the command",
                         Description =
-                            $"{Formatter.InlineCode(e.Command.QualifiedName)} threw an exception:\n {ex}",
+                            $"{Formatter.InlineCode(e.Command.QualifiedName)} threw an exception: \n{ex.Message}\n\n {ex}",
                         Color = new DiscordColor(16711680)
                     };
                     var guild = await e.Context.Client.GetGuildAsync(750409700750786632);
