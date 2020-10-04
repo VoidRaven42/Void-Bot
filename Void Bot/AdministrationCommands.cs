@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -194,7 +193,8 @@ namespace Void_Bot
             }
             else
             {
-                await ctx.RespondAsync( $"Are you sure you want to delete {amount} messages? (Deletion will take around {Math.Floor(Convert.ToDouble(amount) / 100) * 2} seconds)\nConfirm by responding \"y\" or \"n\".");
+                await ctx.RespondAsync(
+                    $"Are you sure you want to delete {amount} messages? (Deletion will take around {Math.Floor(Convert.ToDouble(amount) / 100) * 2} seconds)\nConfirm by responding \"y\" or \"n\".");
                 var interactivity = ctx.Client.GetInteractivity();
                 var responsemsg = await interactivity.WaitForMessageAsync(
                     xm => xm.Author == ctx.User &&
@@ -214,26 +214,33 @@ namespace Void_Bot
                 var total = 0;
                 IReadOnlyList<DiscordMessage> msgs = new List<DiscordMessage>();
 
-                for (var i = 0; i < (amount - amount % 100) / 100 + 1; i++)
+                try
                 {
-                    if (i == (amount - amount % 100) / 100)
+                    for (var i = 0; i < (amount - amount % 100) / 100 + 1; i++)
                     {
-                        msgs = await ctx.Channel.GetMessagesAsync(amount % 100);
-                        if (msgs.Count == 0) break;
-                        total += msgs.Count;
-                        await ctx.Channel.DeleteMessagesAsync(msgs);
-                    }
-                    else
-                    {
-                        msgs = await ctx.Channel.GetMessagesAsync();
-                        if (msgs.Count == 0) break;
-                        total += msgs.Count;
-                        await ctx.Channel.DeleteMessagesAsync(msgs);
-                    }
+                        if (i == (amount - amount % 100) / 100)
+                        {
+                            msgs = await ctx.Channel.GetMessagesAsync(amount % 100);
+                            if (msgs.Count == 0) break;
+                            total += msgs.Count;
+                            await ctx.Channel.DeleteMessagesAsync(msgs);
+                        }
+                        else
+                        {
+                            msgs = await ctx.Channel.GetMessagesAsync();
+                            if (msgs.Count == 0) break;
+                            total += msgs.Count;
+                            await ctx.Channel.DeleteMessagesAsync(msgs);
+                        }
 
-                    await Task.Delay(2000);
+                        await Task.Delay(2000);
+                    }
+                    var msg = await ctx.RespondAsync($"{total} messages deleted!");
                 }
-                var msg = await ctx.RespondAsync($"{total} messages deleted!");
+                catch (Exception e)
+                {
+                    await ctx.RespondAsync("Cannot delete messages older than two weeks!");
+                }
             }
         }
 

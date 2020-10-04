@@ -48,8 +48,8 @@ namespace Void_Bot
             var refresh = File.ReadAllText("refresh.txt");
             var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
             Subreddit sub = null;
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
-            DiscordMessage msg = ctx.Message;
+            var embed = new DiscordEmbedBuilder();
+            var msg = ctx.Message;
             if (!RedditCache.ContainsKey(subreddit))
             {
                 embed = new DiscordEmbedBuilder
@@ -59,7 +59,7 @@ namespace Void_Bot
                 };
                 msg = await ctx.RespondAsync(embed: embed.Build());
             }
-            
+
             try
             {
                 sub = reddit.Subreddit(subreddit).About();
@@ -89,6 +89,7 @@ namespace Void_Bot
                     : await msg.ModifyAsync(embed: embed.Build());
                 return;
             }
+
             var hot = new List<Post>();
             if (RedditCache.ContainsKey(subreddit))
             {
@@ -99,6 +100,7 @@ namespace Void_Bot
                 hot = sub.Posts.Hot;
                 RedditCache.Add(subreddit, hot);
             }
+
             Post img = null;
             var allownsfw = ctx.Channel.IsNSFW;
 
@@ -188,8 +190,9 @@ namespace Void_Bot
                 await ctx.Channel.DeleteMessagesAsync(messages2);
                 return;
             }
+
             var Embed = new DiscordEmbedBuilder();
-            DiscordMessage msg = ctx.Message;
+            var msg = ctx.Message;
             if (!E6Cache.ContainsKey(tags))
             {
                 Embed = new DiscordEmbedBuilder
@@ -199,7 +202,7 @@ namespace Void_Bot
                 };
                 msg = await ctx.RespondAsync(embed: Embed.Build());
             }
-            
+
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
             var e = await E6HttpGet("https://e621.net/posts.json", tagssplit.ToArray(), tags);
@@ -253,6 +256,7 @@ namespace Void_Bot
                 };
                 msg = await ctx.RespondAsync(embed: Embed.Build());
             }
+
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
             var e = await E9HttpGet("https://e926.net/posts.json", tagssplit.ToArray(), tags);
@@ -320,6 +324,7 @@ namespace Void_Bot
                 };
                 msg = await ctx.RespondAsync(embed: Embed.Build());
             }
+
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
             var e = await R34HttpGet("https://r34-json-api.herokuapp.com/posts", tagssplit.ToArray(), tags);
@@ -409,6 +414,7 @@ namespace Void_Bot
                 streamReader.Close();
                 E6Cache.Add(rawtags, s);
             }
+
             var jo = JObject.Parse(s);
             var random = new Random();
             if (!jo["posts"].Any()) return null;
@@ -454,6 +460,7 @@ namespace Void_Bot
                 streamReader.Close();
                 E9Cache.Add(rawtags, s);
             }
+
             var jo = JObject.Parse(s);
             var random = new Random();
             if (!jo["posts"].Any()) return null;
@@ -518,6 +525,7 @@ namespace Void_Bot
                 streamReader.Close();
                 R34Cache.Add(rawtags, s);
             }
+
             var jo = JArray.Parse(s);
             var random = new Random();
             if (jo.Count == 0) return null;
@@ -529,7 +537,7 @@ namespace Void_Bot
             }
 
             if (jo[rand]["source"] == null)
-                return (jo[rand]["type"]!.ToString() != "image")
+                return jo[rand]["type"]!.ToString() != "image"
                     ? jo[rand]["preview_url"]!.ToString()
                     : jo[rand]["file_url"]!.ToString();
 
