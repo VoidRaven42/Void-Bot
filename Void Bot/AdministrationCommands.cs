@@ -194,7 +194,7 @@ namespace Void_Bot
             else
             {
                 await ctx.RespondAsync(
-                    $"Are you sure you want to delete {amount} messages? (Deletion will take around {Math.Floor(Convert.ToDouble(amount) / 100) * 2} seconds)\nConfirm by responding \"y\" or \"n\".");
+                    $"Are you sure you want to delete {amount} messages? (Deletion will take around {Math.Floor(Convert.ToDouble(amount) / 100) * 5} seconds)\nConfirm by responding \"y\" or \"n\".");
                 var interactivity = ctx.Client.GetInteractivity();
                 var responsemsg = await interactivity.WaitForMessageAsync(
                     xm => xm.Author == ctx.User &&
@@ -203,8 +203,9 @@ namespace Void_Bot
                 if (responsemsg.Result == null)
                 {
                     await ctx.RespondAsync("Response timed out");
+                    return;
                 }
-                else if (responsemsg.Result.Content.ToLower() == "n")
+                if (responsemsg.Result.Content.ToLower() == "n")
                 {
                     await ctx.RespondAsync("Deletion cancelled.");
                     return;
@@ -233,7 +234,7 @@ namespace Void_Bot
                             await ctx.Channel.DeleteMessagesAsync(msgs);
                         }
 
-                        await Task.Delay(2000);
+                        await Task.Delay(5000);
                     }
                     var msg = await ctx.RespondAsync($"{total} messages deleted!");
                 }
