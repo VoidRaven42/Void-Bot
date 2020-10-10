@@ -391,8 +391,6 @@ namespace Void_Bot
             {
                 await ctx.RespondAsync("Restricted command.");
             }
-
-            await ctx.Guild.GetRole(734367966820302929).ModifyAsync(x => x.Color = DiscordColor.None);
         }
     }
 }

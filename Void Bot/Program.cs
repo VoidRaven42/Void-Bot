@@ -53,8 +53,6 @@ namespace Void_Bot
 
         public static IReadOnlyDictionary<int, InteractivityExtension> Interactivity { get; set; }
 
-        public static IReadOnlyDictionary<int, VoiceNextExtension> Voice { get; set; }
-
         public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
@@ -114,7 +112,6 @@ namespace Void_Bot
 
             discord.MessageCreated += Discord_MessageCreated;
             await discord.StartAsync();
-            Voice = await discord.UseVoiceNextAsync(new VoiceNextConfiguration());
 
             try
             {
@@ -182,11 +179,11 @@ namespace Void_Bot
             ExternalCommands.E9Cache.Clear();
             ExternalCommands.R34Cache.Clear();
         }
-        private static async Task Discord_MessageCreated(MessageCreateEventArgs e)
+        private static async Task Discord_MessageCreated(DiscordClient client, MessageCreateEventArgs e)
         {
         }
 
-        private static async Task Commands_CommandErrored(CommandErrorEventArgs e)
+        private static async Task Commands_CommandErrored(CommandsNextExtension ext, CommandErrorEventArgs e)
         {
             Override = false;
             DiscordEmbedBuilder embed = null;
@@ -266,7 +263,7 @@ namespace Void_Bot
             if (embed != null) await e.Context.RespondAsync("", false, embed.Build());
         }
 
-        private static async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
+        private static async Task Commands_CommandExecuted(CommandsNextExtension ext, CommandExecutionEventArgs e)
         {
             discord.Logger.Log(LogLevel.Information,
                 e.Context.Guild == null
@@ -275,7 +272,7 @@ namespace Void_Bot
                 DateTime.Now);
         }
 
-        private static async Task Discord_GuildMemberAdded(GuildMemberAddEventArgs e)
+        private static async Task Discord_GuildMemberAdded(DiscordClient client, GuildMemberAddEventArgs e)
         {
             var Embed = new DiscordEmbedBuilder
             {

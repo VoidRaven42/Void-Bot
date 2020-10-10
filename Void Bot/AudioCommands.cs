@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -111,14 +112,15 @@ namespace Void_Bot
             var node = Lavalink;
             var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
 
+            
             if (conn == null) await Join(ctx);
             conn = node.GetGuildConnection(ctx.Guild);
-            var loadResult = await node.Rest.GetTracksAsync(search);
+            var loadResult = await Lavalink.Rest.GetTracksAsync(new Uri(search, UriKind.Relative));
 
             if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed ||
                 loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
             {
-                await ctx.RespondAsync($"Track search failed for {search}.");
+                await ctx.RespondAsync("Track search failed.");
                 if (conn.CurrentState.CurrentTrack == null)
                     await Leave(ctx);
                 return;
@@ -134,8 +136,16 @@ namespace Void_Bot
                 else
                 {
                     queues[ctx.Guild.Id].Enqueue(result);
-                    await ctx.RespondAsync(
-                        $"A track was already playing, the requested track ( {result.Title}, `{"https://youtu.be/" + result.Uri.ToString()[^11..]}` ) has been added to the queue!");
+                    if (!result.Identifier.StartsWith("D:/"))
+                    {
+                        await ctx.RespondAsync(
+                            $"A track was already playing, the requested track ( {result.Title}, `{"https://youtu.be/" + result.Uri.ToString()[^11..]}` ) has been added to the queue!");
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync("Enqueued Text-To-Speech.");
+                    }
+
                     return;
                 }
             }
@@ -145,9 +155,16 @@ namespace Void_Bot
                 await conn.PlayAsync(result);
             }
 
-            await ctx.RespondAsync(
-                    $"Now playing {result.Title} by {result.Author} (`{"https://youtu.be/" + result.Uri.ToString()[^11..]}`)!")
-                .ConfigureAwait(false);
+            if (!result.Identifier.StartsWith("D:/"))
+            {
+                await ctx.RespondAsync(
+                        $"Now playing {result.Title} by {result.Author} (`{"https://youtu.be/" + result.Uri.ToString()[^11..]}`)!")
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                await ctx.RespondAsync("Playing Text-To-Speech!");
+            }
             conn.PlaybackFinished += Conn_PlaybackFinished;
         }
 
@@ -304,12 +321,26 @@ namespace Void_Bot
                 var conn = node.GetGuildConnection(ctx.Guild);
                 if (queues[ctx.Guild.Id] == null) return;
                 if (queues[ctx.Guild.Id].IsEmpty) queues.Remove(ctx.Guild.Id);
-                embed.AddField("Currently Playing",
-                    conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
+                
+                if (!conn.CurrentState.CurrentTrack.Identifier.StartsWith("D:/"))
+                {
+                    embed.AddField("Currently Playing", conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
+                }
+                else
+                {
+                    embed.AddField("Currently Playing", "Text-To-Speech");
+                }
                 var i = 1;
                 foreach (var elem in queues[ctx.Guild.Id])
                 {
-                    embed.AddField($"Track {i}", elem.Title + " by " + elem.Author, true);
+                    if (!conn.CurrentState.CurrentTrack.Identifier.StartsWith("D:/"))
+                    {
+                        embed.AddField($"Track {i}", elem.Title + " by " + elem.Author, true);
+                    }
+                    else
+                    {
+                        embed.AddField($"Track {i}", "Text-To-Speech", true);
+                    }
                     i++;
                 }
 
@@ -341,13 +372,20 @@ namespace Void_Bot
                 Color = DiscordColor.Lilac
             };
             var current = conn.CurrentState.CurrentTrack;
-            embed.AddField("Title", current.Title);
-            embed.AddField("Position",
+            if (!current.Identifier.StartsWith("D:/"))
+            {
+                embed.AddField("Title", current.Title);
+                embed.AddField("Position",
                 conn.CurrentState.PlaybackPosition.ToString().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
                     .TrimEnd('.') + '/' + current.Length, true);
-            embed.AddField("Channel", current.Author, true);
-            embed.AddField("Direct Link", "https://youtu.be/" + current.Uri.ToString()[^11..]);
-            embed.WithThumbnail("https://img.youtube.com/vi/" + current.Uri.ToString()[^11..] + "/0.jpg");
+                embed.AddField("Channel", current.Author, true);
+                embed.AddField("Direct Link", "https://youtu.be/" + current.Uri.ToString()[^11..]);
+                embed.WithThumbnail("https://img.youtube.com/vi/" + current.Uri.ToString()[^11..] + "/0.jpg");
+            }
+            else
+            {
+                embed.AddField("Title", "(Text-To-Speech)");
+            }
 
             await ctx.RespondAsync(embed: embed);
         }
@@ -428,22 +466,7 @@ namespace Void_Bot
         [Aliases("tts")]
         public async Task TextToSpeech(CommandContext ctx, [RemainingText] string inputstring)
         {
-            if (ctx.Member.VoiceState == null || ctx.Member.VoiceState.Channel == null)
-            {
-                await ctx.RespondAsync("You must be in a voice channel!");
-                return;
-            }
-
-            var chn = ctx.Member.VoiceState.Channel;
-
-            var vnext = ctx.Client.GetVoiceNext();
-            var vnc = vnext.GetConnection(ctx.Guild);
-
-            var msg = await ctx.RespondAsync(embed: new DiscordEmbedBuilder
-            {
-                Title = "Processing audio...",
-                Color = DiscordColor.Yellow
-            });
+            var msg = await ctx.RespondAsync("Processing audio...");
             var client = await new TextToSpeechClientBuilder
                 {CredentialsPath = "Void Bot TTS-4af47ad6a178.json"}.BuildAsync();
             var input = new SynthesisInput
@@ -459,7 +482,7 @@ namespace Void_Bot
 
             var config = new AudioConfig
             {
-                AudioEncoding = AudioEncoding.Linear16
+                AudioEncoding = AudioEncoding.Mp3
             };
 
             var response = new SynthesizeSpeechResponse();
@@ -475,78 +498,28 @@ namespace Void_Bot
             }
             catch (Exception e)
             {
-                await msg.ModifyAsync(embed: new DiscordEmbedBuilder
-                {
-                    Title = "Error occurred in processing audio! (Was your request too long?)",
-                    Color = DiscordColor.Red
-                }.Build());
+                await msg.ModifyAsync("Error occurred in processing audio! (Was your request too long?)");
 
                 return;
             }
 
-            if (vnc != null)
-            {
-                await msg.ModifyAsync(embed: new DiscordEmbedBuilder
-                {
-                    Title = "Waiting for previous playback to finish",
-                    Color = DiscordColor.Orange
-                }.Build());
-                await vnc.WaitForPlaybackFinishAsync();
-            }
-
             var time = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
-            using (Stream output = File.Create($"D:/Temp/{time}.mp3"))
+            using (Stream output = File.Create($"D:/Lavalink/Temp/{time}.mp3"))
             {
                 response.AudioContent.WriteTo(output);
-                Console.WriteLine("Audio content successfully written to file");
             }
 
-            var psi = new ProcessStartInfo
-            {
-                FileName = "ffmpeg",
-                Arguments = $@"-i ""D:/Temp/{time + ".mp3"}"" -ac 2 -f s16le -ar 48000 pipe:1",
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
-
-            var ffmpeg = Process.Start(psi);
-            var ffout = ffmpeg.StandardOutput.BaseStream;
-            if (vnc == null)
-                try
-                {
-                    vnc = await chn.ConnectAsync();
-                }
-                catch (Exception e)
-                {
-                    // ignored
-                }
-
-            var txStream = vnc.GetTransmitStream();
-
-            await msg.ModifyAsync(embed: new DiscordEmbedBuilder
-            {
-                Title = "Sending audio!",
-                Color = DiscordColor.Green
-            }.Build());
-
-            await ffout.CopyToAsync(txStream);
-            await txStream.FlushAsync();
-
-            File.Delete($"D:/Temp/{time}.mp3");
-
-            await vnc.WaitForPlaybackFinishAsync();
-
-            await Task.Delay(5000);
-            if (!vnc.IsPlaying)
-            {
-                vnc.Disconnect();
-            }
+            await Play(ctx, $"D:/Lavalink/Temp/{time}.mp3");
         }
 
-        public async Task Conn_PlaybackFinished(TrackFinishEventArgs e)
+        public async Task Conn_PlaybackFinished(LavalinkGuildConnection conn, TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
+            if (e.Track.Identifier.StartsWith("D:/"))
+            {
+                File.Delete(e.Track.Identifier);               
+            }
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
             if (e.Reason == TrackEndReason.Finished || e.Reason == TrackEndReason.Stopped)
             {
