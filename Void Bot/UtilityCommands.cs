@@ -12,6 +12,13 @@ namespace Void_Bot
     [Description("Commands that do useful stuff")]
     public class UtilityCommands : BaseCommandModule
     {
+
+        [Command("ping")]
+        public async Task Ping(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"Pong! ({ctx.Client.Ping} ms)");
+        }
+
         [Command("avatar")]
         [Aliases("pfp")]
         [Description("Takes the username or id and returns the pfp in high quality.")]

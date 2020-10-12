@@ -79,7 +79,7 @@ namespace Void_Bot
                     {
                         css = await cs.RunAsync(new Globals
                         {
-                            context = ctx,
+                            ctx = ctx,
                             user = ctx.User,
                             client = ctx.Client,
                             member = ctx.Member,
@@ -91,9 +91,10 @@ namespace Void_Bot
                     {
                         css = await cs.RunAsync(new Globals
                         {
-                            context = ctx,
+                            ctx = ctx,
                             user = ctx.User,
                             client = ctx.Client,
+                            rest = Program.discordrest,
                             guild = ctx.Guild,
                             member = ctx.Member,
                             channel = ctx.Channel
@@ -336,7 +337,9 @@ namespace Void_Bot
 
             public DiscordClient client;
 
-            public CommandContext context;
+            public DiscordRestClient rest;
+
+            public CommandContext ctx;
 
             public DiscordGuild guild;
 

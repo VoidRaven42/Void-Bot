@@ -26,6 +26,8 @@ namespace Void_Bot
     {
         public static DiscordShardedClient discord;
 
+        public static DiscordRestClient discordrest;
+
         private static readonly string token = File.ReadAllText("token.txt");
 
         public static bool CustomStatus = false;
@@ -72,12 +74,15 @@ namespace Void_Bot
             var DayTask = new Timer(43200000); //12 hours in ms
             DayTask.Elapsed += DayEvent;
             DayTask.Start();
-            discord = new DiscordShardedClient(new DiscordConfiguration
+            var config = new DiscordConfiguration
             {
                 Token = token,
                 TokenType = TokenType.Bot,
                 ReconnectIndefinitely = true
-            });
+            };
+            discord = new DiscordShardedClient(config);
+
+            discordrest = new DiscordRestClient(config);
 
             Lavalink = await discord.UseLavalinkAsync();
 

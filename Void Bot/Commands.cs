@@ -357,6 +357,12 @@ namespace Void_Bot
             await util.Roll(ctx, input);
         }
 
+        [Command("ping")]
+        public async Task Ping(CommandContext ctx)
+        {
+            await util.Ping(ctx);
+        }
+
 
         [Command("override")]
         [Hidden]
