@@ -363,6 +363,12 @@ namespace Void_Bot
             await util.Ping(ctx);
         }
 
+        [Command]
+        [Hidden]
+        public async Task Hug(CommandContext ctx)
+        {
+            await fun.Hug(ctx);
+        }
 
         [Command("override")]
         [Hidden]
@@ -372,6 +378,10 @@ namespace Void_Bot
             {
                 Program.Override = true;
                 var pieces = args.Split(' ', 2);
+                if (pieces.Length == 1)
+                {
+                    pieces = new [] {pieces[0], ""};
+                }
                 var context = Program.Commands.Values.First()
                     .CreateContext(ctx.Message, ctx.Prefix, ctx.Command, args);
                 try
@@ -383,7 +393,7 @@ namespace Void_Bot
                             .First(x => x.Name.ToUpper() == pieces[0].ToUpper()),
                         pieces[1]);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     await ctx.RespondAsync("Command not found.");
                     return;

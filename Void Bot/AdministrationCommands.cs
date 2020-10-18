@@ -239,7 +239,7 @@ namespace Void_Bot
                     }
                     var msg = await ctx.RespondAsync($"{total} messages deleted!");
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     await ctx.RespondAsync("Cannot delete messages older than two weeks!");
                 }

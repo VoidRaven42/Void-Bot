@@ -569,7 +569,7 @@ namespace Void_Bot
                 {
                     data = client.OpenRead(URI);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return "error";
                 }

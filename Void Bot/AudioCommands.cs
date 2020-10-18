@@ -115,7 +115,15 @@ namespace Void_Bot
             
             if (conn == null) await Join(ctx);
             conn = node.GetGuildConnection(ctx.Guild);
-            var loadResult = await Lavalink.Rest.GetTracksAsync(new Uri(search, UriKind.Relative));
+            LavalinkLoadResult loadResult = new LavalinkLoadResult();
+            if (search.StartsWith("D:/"))
+            {
+                loadResult = await Lavalink.Rest.GetTracksAsync(new Uri(search, UriKind.Relative));
+            }
+            else
+            {
+                loadResult = await Lavalink.Rest.GetTracksAsync(search);
+            }
 
             if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed ||
                 loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
@@ -333,7 +341,7 @@ namespace Void_Bot
                 var i = 1;
                 foreach (var elem in queues[ctx.Guild.Id])
                 {
-                    if (!conn.CurrentState.CurrentTrack.Identifier.StartsWith("D:/"))
+                    if (!elem.Identifier.StartsWith("D:/"))
                     {
                         embed.AddField($"Track {i}", elem.Title + " by " + elem.Author, true);
                     }
@@ -496,7 +504,7 @@ namespace Void_Bot
                     AudioConfig = config
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 await msg.ModifyAsync("Error occurred in processing audio! (Was your request too long?)");
 

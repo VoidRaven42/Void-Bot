@@ -102,13 +102,15 @@ namespace Void_Bot
 
                     msgcontent = msgcontent.Trim(',', ' ');
                     msgcontent += $"\n\nTotal: {totalrolls}";
+                    if (msgcontent.Length > 2000)
+                        msgcontent = $"Too many dice!\n\nTotal: {totalrolls}";
                     await ctx.RespondAsync(msgcontent);
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                await ctx.RespondAsync("Invalid input!");
+                await ctx.RespondAsync("Invalid input! (Did you roll a ridiculous amount of dice?)");
             }
         }
     }

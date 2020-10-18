@@ -204,5 +204,11 @@ namespace Void_Bot
             await ctx.RespondAsync(
                 "https://cdn.discordapp.com/attachments/730455843484467292/742434971716681879/image0-2.png");
         }
+
+        [Command]
+        public async Task Hug(CommandContext ctx)
+        {
+            await ctx.RespondAsync("https://tenor.com/view/hug-peachcat-cat-cute-gif-13985247");
+        }
     }
 }
