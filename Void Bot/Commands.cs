@@ -334,7 +334,6 @@ namespace Void_Bot
         [Aliases("uma")]
         [RequirePermissions(Permissions.MuteMembers)]
         [Hidden]
-
         public async Task UnMuteAll(CommandContext ctx)
         {
             await au.UnMuteAll(ctx);
@@ -350,7 +349,8 @@ namespace Void_Bot
 
         [Command("roll")]
         [Aliases("dice")]
-        [Description("Takes an input of dice notation, (\"2d20 + 6d6 + 1d2\"), and returns the result of all the rolls")]
+        [Description(
+            "Takes an input of dice notation, (\"2d20 + 6d6 + 1d2\"), and returns the result of all the rolls")]
         [Hidden]
         public async Task Roll(CommandContext ctx, [RemainingText] string input)
         {
@@ -378,10 +378,7 @@ namespace Void_Bot
             {
                 Program.Override = true;
                 var pieces = args.Split(' ', 2);
-                if (pieces.Length == 1)
-                {
-                    pieces = new [] {pieces[0], ""};
-                }
+                if (pieces.Length == 1) pieces = new[] {pieces[0], ""};
                 var context = Program.Commands.Values.First()
                     .CreateContext(ctx.Message, ctx.Prefix, ctx.Command, args);
                 try

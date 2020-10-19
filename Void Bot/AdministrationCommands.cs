@@ -8,7 +8,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -206,6 +206,7 @@ namespace Void_Bot
                     await ctx.RespondAsync("Response timed out");
                     return;
                 }
+
                 if (responsemsg.Result.Content.ToLower() == "n")
                 {
                     await ctx.RespondAsync("Deletion cancelled.");
@@ -237,6 +238,7 @@ namespace Void_Bot
 
                         await Task.Delay(5000);
                     }
+
                     var msg = await ctx.RespondAsync($"{total} messages deleted!");
                 }
                 catch (Exception)
@@ -337,13 +339,13 @@ namespace Void_Bot
 
             public DiscordClient client;
 
-            public DiscordRestClient rest;
-
             public CommandContext ctx;
 
             public DiscordGuild guild;
 
             public DiscordMember member;
+
+            public DiscordRestClient rest;
 
             public DiscordUser user;
         }

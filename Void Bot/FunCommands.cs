@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 
 namespace Void_Bot
 {

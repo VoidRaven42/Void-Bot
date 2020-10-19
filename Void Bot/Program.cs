@@ -14,9 +14,9 @@ using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Net;
-using DSharpPlus.VoiceNext;
 using Microsoft.Extensions.Logging;
 using Timer = System.Timers.Timer;
 
@@ -184,6 +184,7 @@ namespace Void_Bot
             ExternalCommands.E9Cache.Clear();
             ExternalCommands.R34Cache.Clear();
         }
+
         private static async Task Discord_MessageCreated(DiscordClient client, MessageCreateEventArgs e)
         {
         }

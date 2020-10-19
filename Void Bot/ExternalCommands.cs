@@ -43,10 +43,8 @@ namespace Void_Bot
         [Description("Gets one of the top 100 hot posts on the specified subreddit")]
         public async Task Reddit(CommandContext ctx, string subreddit)
         {
-            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) && ctx.Guild.Id == 744661851127677008)
-            {
-                Program.Override = true;
-            }
+            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) &&
+                ctx.Guild.Id == 744661851127677008) Program.Override = true;
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
             var refresh = File.ReadAllText("refresh.txt");
@@ -184,10 +182,8 @@ namespace Void_Bot
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
-            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) && ctx.Guild.Id == 744661851127677008)
-            {
-                Program.Override = true;
-            }
+            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) &&
+                ctx.Guild.Id == 744661851127677008) Program.Override = true;
 
             if (!ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
             {
@@ -243,8 +239,11 @@ namespace Void_Bot
                     };
                     Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                     msg = msg == ctx.Message
-                        ? await ctx.RespondAsync($"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}")
-                        : await msg.ModifyAsync($"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}", embed: null);
+                        ? await ctx.RespondAsync(
+                            $"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}")
+                        : await msg.ModifyAsync(
+                            $"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}",
+                            null);
                 }
                 else
                 {
@@ -261,8 +260,8 @@ namespace Void_Bot
                         ? await ctx.RespondAsync(embed: Embed.Build())
                         : await msg.ModifyAsync(embed: Embed.Build());
                 }
-                
-                
+
+
                 E6Array[E6Elem] = img;
                 E6Elem += 1;
                 if (E6Elem == 20) E6Elem = 0;
@@ -317,8 +316,11 @@ namespace Void_Bot
                     };
                     Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                     msg = msg == ctx.Message
-                        ? await ctx.RespondAsync($"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}")
-                        : await msg.ModifyAsync($"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}", embed: null);
+                        ? await ctx.RespondAsync(
+                            $"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}")
+                        : await msg.ModifyAsync(
+                            $"Post Retrieved!\nThe file may be too large to display, if nothing shows after a few seconds, click the link.\n\nDirect link: {img}",
+                            null);
                 }
                 else
                 {
@@ -335,6 +337,7 @@ namespace Void_Bot
                         ? await ctx.RespondAsync(embed: Embed.Build())
                         : await msg.ModifyAsync(embed: Embed.Build());
                 }
+
                 E9Array[E9Elem] = img;
                 E9Elem += 1;
                 if (E9Elem == 20) E9Elem = 0;
@@ -348,10 +351,8 @@ namespace Void_Bot
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
-            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) && ctx.Guild.Id == 744661851127677008)
-            {
-                Program.Override = true;
-            }
+            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) &&
+                ctx.Guild.Id == 744661851127677008) Program.Override = true;
             if (!ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
@@ -575,7 +576,7 @@ namespace Void_Bot
                 }
 
                 var streamReader = new StreamReader(data);
-                s = streamReader.ReadToEnd();
+                s = await streamReader.ReadToEndAsync();
                 data.Close();
                 streamReader.Close();
                 R34Cache.Add(rawtags, s);

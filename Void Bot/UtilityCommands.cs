@@ -12,7 +12,6 @@ namespace Void_Bot
     [Description("Commands that do useful stuff")]
     public class UtilityCommands : BaseCommandModule
     {
-
         [Command("ping")]
         public async Task Ping(CommandContext ctx)
         {
@@ -36,7 +35,8 @@ namespace Void_Bot
 
         [Command("roll")]
         [Aliases("dice")]
-        [Description("Takes an input of dice notation, (\"2d20 + 6d6 + 1d2\"), and returns the result of all the rolls")]
+        [Description(
+            "Takes an input of dice notation, (\"2d20 + 6d6 + 1d2\"), and returns the result of all the rolls")]
         public async Task Roll(CommandContext ctx, [RemainingText] string input)
         {
             try
@@ -66,14 +66,25 @@ namespace Void_Bot
                     var num = int.Parse(args[0]);
                     var sides = int.Parse(args[1]);
 
+                    if (sides > 10000)
+                    {
+                        await ctx.RespondAsync("Over 10000 sides? Why did you just try and roll a ball?");
+                        return;
+                    }
+
                     if (totnum <= 24)
                     {
                         for (var i = 0; i < num; i++)
                         {
                             var rand = new Random().Next(1, sides + 1);
                             totalrolls += rand;
-                            embed.AddField($"Dice {i+1} (d{args[1]})", rand.ToString(), true);
+                            embed.AddField($"Dice {i + 1} (d{args[1]})", rand.ToString(), true);
                         }
+                    }
+                    else if (totnum > 500)
+                    {
+                        await ctx.RespondAsync("Too many dice! (Max 500)");
+                        return;
                     }
                     else
                     {
@@ -84,7 +95,6 @@ namespace Void_Bot
                             output.Add($"(d{sides}) " + rand);
                         }
                     }
-
                 }
 
                 if (output.Count == 0)
@@ -95,10 +105,7 @@ namespace Void_Bot
                 else
                 {
                     var msgcontent = "";
-                    foreach (var elem in output)
-                    {
-                        msgcontent += elem + ", ";
-                    }
+                    foreach (var elem in output) msgcontent += elem + ", ";
 
                     msgcontent = msgcontent.Trim(',', ' ');
                     msgcontent += $"\n\nTotal: {totalrolls}";
@@ -106,7 +113,6 @@ namespace Void_Bot
                         msgcontent = $"Too many dice!\n\nTotal: {totalrolls}";
                     await ctx.RespondAsync(msgcontent);
                 }
-
             }
             catch (Exception)
             {

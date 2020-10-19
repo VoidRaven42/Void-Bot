@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -12,7 +10,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Lavalink;
 using DSharpPlus.Lavalink.EventArgs;
-using DSharpPlus.VoiceNext;
 using Google.Cloud.TextToSpeech.V1;
 
 namespace Void_Bot
@@ -112,18 +109,14 @@ namespace Void_Bot
             var node = Lavalink;
             var conn = node.GetGuildConnection(ctx.Member.VoiceState.Guild);
 
-            
+
             if (conn == null) await Join(ctx);
             conn = node.GetGuildConnection(ctx.Guild);
-            LavalinkLoadResult loadResult = new LavalinkLoadResult();
+            var loadResult = new LavalinkLoadResult();
             if (search.StartsWith("D:/"))
-            {
                 loadResult = await Lavalink.Rest.GetTracksAsync(new Uri(search, UriKind.Relative));
-            }
             else
-            {
                 loadResult = await Lavalink.Rest.GetTracksAsync(search);
-            }
 
             if (loadResult.LoadResultType == LavalinkLoadResultType.LoadFailed ||
                 loadResult.LoadResultType == LavalinkLoadResultType.NoMatches)
@@ -145,14 +138,10 @@ namespace Void_Bot
                 {
                     queues[ctx.Guild.Id].Enqueue(result);
                     if (!result.Identifier.StartsWith("D:/"))
-                    {
                         await ctx.RespondAsync(
                             $"A track was already playing, the requested track ( {result.Title}, `{"https://youtu.be/" + result.Uri.ToString()[^11..]}` ) has been added to the queue!");
-                    }
                     else
-                    {
                         await ctx.RespondAsync("Enqueued Text-To-Speech.");
-                    }
 
                     return;
                 }
@@ -164,15 +153,11 @@ namespace Void_Bot
             }
 
             if (!result.Identifier.StartsWith("D:/"))
-            {
                 await ctx.RespondAsync(
                         $"Now playing {result.Title} by {result.Author} (`{"https://youtu.be/" + result.Uri.ToString()[^11..]}`)!")
                     .ConfigureAwait(false);
-            }
             else
-            {
                 await ctx.RespondAsync("Playing Text-To-Speech!");
-            }
             conn.PlaybackFinished += Conn_PlaybackFinished;
         }
 
@@ -329,26 +314,19 @@ namespace Void_Bot
                 var conn = node.GetGuildConnection(ctx.Guild);
                 if (queues[ctx.Guild.Id] == null) return;
                 if (queues[ctx.Guild.Id].IsEmpty) queues.Remove(ctx.Guild.Id);
-                
+
                 if (!conn.CurrentState.CurrentTrack.Identifier.StartsWith("D:/"))
-                {
-                    embed.AddField("Currently Playing", conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
-                }
+                    embed.AddField("Currently Playing",
+                        conn.CurrentState.CurrentTrack.Title + " by " + conn.CurrentState.CurrentTrack.Author);
                 else
-                {
                     embed.AddField("Currently Playing", "Text-To-Speech");
-                }
                 var i = 1;
                 foreach (var elem in queues[ctx.Guild.Id])
                 {
                     if (!elem.Identifier.StartsWith("D:/"))
-                    {
                         embed.AddField($"Track {i}", elem.Title + " by " + elem.Author, true);
-                    }
                     else
-                    {
                         embed.AddField($"Track {i}", "Text-To-Speech", true);
-                    }
                     i++;
                 }
 
@@ -384,8 +362,9 @@ namespace Void_Bot
             {
                 embed.AddField("Title", current.Title);
                 embed.AddField("Position",
-                conn.CurrentState.PlaybackPosition.ToString().TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-                    .TrimEnd('.') + '/' + current.Length, true);
+                    conn.CurrentState.PlaybackPosition.ToString()
+                        .TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+                        .TrimEnd('.') + '/' + current.Length, true);
                 embed.AddField("Channel", current.Author, true);
                 embed.AddField("Direct Link", "https://youtu.be/" + current.Uri.ToString()[^11..]);
                 embed.WithThumbnail("https://img.youtube.com/vi/" + current.Uri.ToString()[^11..] + "/0.jpg");
@@ -524,10 +503,7 @@ namespace Void_Bot
         public async Task Conn_PlaybackFinished(LavalinkGuildConnection conn, TrackFinishEventArgs e)
         {
             await Task.Delay(2000);
-            if (e.Track.Identifier.StartsWith("D:/"))
-            {
-                File.Delete(e.Track.Identifier);               
-            }
+            if (e.Track.Identifier.StartsWith("D:/")) File.Delete(e.Track.Identifier);
             if (e.Reason == TrackEndReason.Replaced || !e.Player.IsConnected) return;
             if (e.Reason == TrackEndReason.Finished || e.Reason == TrackEndReason.Stopped)
             {
