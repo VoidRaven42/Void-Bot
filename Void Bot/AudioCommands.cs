@@ -139,7 +139,7 @@ namespace Void_Bot
                     queues[ctx.Guild.Id].Enqueue(result);
                     if (!result.Identifier.StartsWith("D:/"))
                         await ctx.RespondAsync(
-                            $"A track was already playing, the requested track ( {result.Title}, `{"https://youtu.be/" + result.Uri.ToString()[^11..]}` ) has been added to the queue!");
+                            $"A track was already playing, the requested track ({result.Title}, `{"https://youtu.be/" + result.Uri.ToString()[^11..]}`) has been added to the queue!");
                     else
                         await ctx.RespondAsync("Enqueued Text-To-Speech.");
 

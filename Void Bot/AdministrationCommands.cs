@@ -333,6 +333,42 @@ namespace Void_Bot
         {
         }
 
+        [Command("move")]
+        public async Task Move(CommandContext ctx, DiscordChannel from, DiscordChannel to)
+        {
+            if (ctx.User.Id == 379708744843395073L)
+            {
+                var whs = await to.GetWebhooksAsync();
+                var name = "Void Bot";
+                var msgs = await from.GetMessagesAsync(10000);
+
+                if (whs.Count(x => x.Name == name) == 0)
+                {
+                    await to.CreateWebhookAsync(name);
+                }
+
+                var wh = whs.SingleOrDefault(w => string.Equals(w.Name, name, StringComparison.CurrentCultureIgnoreCase));
+
+                foreach (var msg in msgs.Reverse())
+                {
+                    var whbuilder = new DiscordWebhookBuilder
+                    {
+                        AvatarUrl = msg.Author.AvatarUrl,
+                        Username = msg.Author.Username
+                    };
+                    whbuilder.WithContent(msg.Attachments.Count == 0 ? msg.Content : msg.Attachments[0].Url);
+                    
+                    await wh.ExecuteAsync(whbuilder);
+
+                    await Task.Delay(3000);
+                }
+            }
+            else
+            {
+                await ctx.RespondAsync("Restricted command");
+            }
+        }
+
         public class Globals
         {
             public DiscordChannel channel;

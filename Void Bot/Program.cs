@@ -91,8 +91,9 @@ namespace Void_Bot
                 Timeout = TimeSpan.FromSeconds(20.0)
             };
             Interactivity = await discord.UseInteractivityAsync(icfg);
-            discord.GuildMemberAdded += Discord_GuildMemberAdded;
 
+            discord.GuildMemberAdded += Discord_GuildMemberAdded;
+            discord.GuildCreated += Discord_GuildCreated;
 
             Commands = await discord.UseCommandsNextAsync(new CommandsNextConfiguration
             {
@@ -175,6 +176,20 @@ namespace Void_Bot
                 {
                     await Task.Delay(1000);
                 }
+        }
+
+        private static async Task Discord_GuildCreated(DiscordClient sender, GuildCreateEventArgs e)
+        {
+            var guild = await sender.GetGuildAsync(750409700750786632);
+            await guild.GetChannel(770439341620330497).SendMessageAsync(embed: new DiscordEmbedBuilder
+            {
+                Title = "Guild Joined",
+                Description =
+                    $"New guild joined.\n```Name: {e.Guild.Name}\nID: {e.Guild.Id}\nNo. members: {e.Guild.MemberCount}" +
+                    $"\nNo. members exc. bots: {e.Guild.Members.Values.Count(x => !x.IsBot)}" +
+                    $"\n\nOwner Name: {e.Guild.Owner.DisplayName + '#' + e.Guild.Owner.Discriminator}" +
+                    $"\nOwner ID: {e.Guild.Owner.Id}```"
+            }.Build());
         }
 
         private static void DayEvent(object source, ElapsedEventArgs e)

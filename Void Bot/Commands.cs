@@ -358,6 +358,7 @@ namespace Void_Bot
         }
 
         [Command("ping")]
+        [Hidden]
         public async Task Ping(CommandContext ctx)
         {
             await util.Ping(ctx);
