@@ -43,13 +43,9 @@ namespace Void_Bot
         [Description("Gets one of the top 100 hot posts on the specified subreddit")]
         public async Task Reddit(CommandContext ctx, string subreddit)
         {
-            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) &&
-                ctx.Guild.Id == 744661851127677008) Program.Override = true;
             var random = new Random();
             var rtoken = File.ReadAllText("reddittoken.txt");
             var refresh = File.ReadAllText("refresh.txt");
-            var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
-            Subreddit sub = null;
             var embed = new DiscordEmbedBuilder();
             var msg = ctx.Message;
             if (!RedditCache.ContainsKey(subreddit))
@@ -62,35 +58,8 @@ namespace Void_Bot
                 msg = await ctx.RespondAsync(embed: embed.Build());
             }
 
-            try
-            {
-                sub = reddit.Subreddit(subreddit).About();
-            }
-            catch
-            {
-                embed = new DiscordEmbedBuilder
-                {
-                    Title = "Subreddit could not be found/accessed, please try another!",
-                    Color = DiscordColor.Yellow
-                };
-                msg = msg == ctx.Message
-                    ? await ctx.RespondAsync(embed: embed.Build())
-                    : await msg.ModifyAsync(embed: embed.Build());
-                return;
-            }
-
-            if (sub.Over18.Value && !ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
-            {
-                embed = new DiscordEmbedBuilder
-                {
-                    Title = "This subreddit is marked NSFW, please try again in an NSFW channel.",
-                    Color = DiscordColor.Yellow
-                };
-                msg = msg == ctx.Message
-                    ? await ctx.RespondAsync(embed: embed.Build())
-                    : await msg.ModifyAsync(embed: embed.Build());
-                return;
-            }
+            var reddit = new RedditClient("Kb6WAOupj1iW1Q", appSecret: rtoken, refreshToken: refresh);
+            Subreddit sub = null;
 
             var hot = new List<Post>();
             if (RedditCache.ContainsKey(subreddit))
@@ -99,9 +68,40 @@ namespace Void_Bot
             }
             else
             {
+                try
+                {
+                    sub = reddit.Subreddit(subreddit).About();
+                }
+                catch
+                {
+                    embed = new DiscordEmbedBuilder
+                    {
+                        Title = "Subreddit could not be found/accessed, please try another!",
+                        Color = DiscordColor.Yellow
+                    };
+                    msg = msg == ctx.Message
+                        ? await ctx.RespondAsync(embed: embed.Build())
+                        : await msg.ModifyAsync(embed: embed.Build());
+                    return;
+                }
+
+                if (sub.Over18.Value && !ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
+                {
+                    embed = new DiscordEmbedBuilder
+                    {
+                        Title = "This subreddit is marked NSFW, please try again in an NSFW channel.",
+                        Color = DiscordColor.Yellow
+                    };
+                    msg = msg == ctx.Message
+                        ? await ctx.RespondAsync(embed: embed.Build())
+                        : await msg.ModifyAsync(embed: embed.Build());
+                    return;
+                }
+
                 hot = sub.Posts.Hot;
                 RedditCache.Add(subreddit, hot);
             }
+            
 
             Post img = null;
             var allownsfw = ctx.Channel.IsNSFW;
@@ -182,9 +182,6 @@ namespace Void_Bot
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
-            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) &&
-                ctx.Guild.Id == 744661851127677008) Program.Override = true;
-
             if (!ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
@@ -351,8 +348,6 @@ namespace Void_Bot
         [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
         public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
-            if ((ctx.User.Id == 490821815153983488 || ctx.User.Id == 379708744843395073) &&
-                ctx.Guild.Id == 744661851127677008) Program.Override = true;
             if (!ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");

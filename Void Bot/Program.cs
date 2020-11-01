@@ -142,7 +142,7 @@ namespace Void_Bot
                         var amount = 0;
                         foreach (var elem in discord.ShardClients.Values)
                         foreach (var guild in elem.Guilds)
-                            amount += guild.Value.Members.Values.Count(x => !x.IsBot);
+                            amount += guild.Value.MemberCount;
                         var status = amount + " users";
                         var activity = new DiscordActivity(status, ActivityType.Watching);
                         await discord.UpdateStatusAsync(activity);
