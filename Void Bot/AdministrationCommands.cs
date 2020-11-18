@@ -135,7 +135,7 @@ namespace Void_Bot
             }
             else
             {
-                await ctx.RespondAsync("Restricted command");
+                await ctx.RespondAsync("Restricted command.");
             }
         }
 
@@ -322,7 +322,7 @@ namespace Void_Bot
             }
             else
             {
-                await ctx.RespondAsync("Restricted to bot creator");
+                await ctx.RespondAsync("Restricted command.");
             }
         }
 

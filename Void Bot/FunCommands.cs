@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity.Extensions;
+using Owoify;
 
 namespace Void_Bot
 {
@@ -209,6 +210,12 @@ namespace Void_Bot
         public async Task Hug(CommandContext ctx)
         {
             await ctx.RespondAsync("https://tenor.com/view/hug-peachcat-cat-cute-gif-13985247");
+        }
+
+        [Command]
+        public async Task Owoify(CommandContext ctx, [RemainingText] string input)
+        {
+            await ctx.RespondAsync(Owoifier.Owoify(input));
         }
     }
 }

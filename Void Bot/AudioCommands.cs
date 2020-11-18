@@ -113,8 +113,10 @@ namespace Void_Bot
             if (conn == null) await Join(ctx);
             conn = node.GetGuildConnection(ctx.Guild);
             var loadResult = new LavalinkLoadResult();
-            if (search.StartsWith("D:/") || search.StartsWith("https:"))
+            if (search.StartsWith("D:/"))
                 loadResult = await Lavalink.Rest.GetTracksAsync(new Uri(search, UriKind.Relative));
+            else if (search.StartsWith("https:"))
+                loadResult = await Lavalink.Rest.GetTracksAsync(new Uri(search, UriKind.Absolute));
             else
                 loadResult = await Lavalink.Rest.GetTracksAsync(search);
 

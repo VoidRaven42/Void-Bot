@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Mime;
+using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Org.BouncyCastle.Crypto.Tls;
 
 //This file is here to allow easier use of commands, while allowing the help command to remain organised
 
@@ -371,6 +375,23 @@ namespace Void_Bot
             await fun.Hug(ctx);
         }
 
+        [Command]
+        [Hidden]
+        public async Task Owoify(CommandContext ctx, [RemainingText] string input)
+        {
+            await fun.Owoify(ctx, input);
+        }
+
+        [Command]
+        [Aliases("si")]
+        [Description("Gives various information about the current server")]
+        [Hidden]
+        public async Task ServerInfo(CommandContext ctx)
+        {
+            await util.ServerInfo(ctx);
+        }
+
+
         [Command("override")]
         [Hidden]
         public async Task Override(CommandContext ctx, [RemainingText] string args)
@@ -400,6 +421,22 @@ namespace Void_Bot
                 await Program.Commands[0].RegisteredCommands.Values.First(x => x.Name.ToUpper() == pieces[0].ToUpper())
                     .ExecuteAsync(context);
                 Program.Override = false;
+            }
+            else
+            {
+                await ctx.RespondAsync("Restricted command.");
+            }
+        }
+
+        [Command]
+        [Hidden]
+        public async Task Restart(CommandContext ctx)
+        {
+            if (ctx.User.Id == 379708744843395073)
+            {
+                await ctx.RespondAsync("Restarting bot...");
+                Process.Start("Void Bot.exe");
+                Environment.Exit(0);
             }
             else
             {

@@ -12,20 +12,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00745" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00745" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00745" />
-    <PackageReference Include="DSharpPlus.Lavalink" Version="4.0.0-nightly-00745" />
-    <PackageReference Include="DSharpPlus.Rest" Version="4.0.0-nightly-00745" />
-    <PackageReference Include="DSharpPlus.VoiceNext" Version="4.0.0-nightly-00745" />
-    <PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="2.0.0" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-rc1" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-rc1" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-rc1" />
+    <PackageReference Include="DSharpPlus.Lavalink" Version="4.0.0-rc1" />
+    <PackageReference Include="DSharpPlus.Rest" Version="4.0.0-rc1" />
+    <PackageReference Include="DSharpPlus.VoiceNext" Version="4.0.0-rc1" />
+    <PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="2.1.0" />
     <PackageReference Include="HSNXT.DSharpPlus.ModernEmbedBuilder" Version="5.0.0-pre.210" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.8.0-5.final" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.8.0-5.final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.8.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="3.8.0" />
     <PackageReference Include="morelinq" Version="3.3.2" />
     <PackageReference Include="MySql.Data" Version="8.0.22" />
+    <PackageReference Include="Owoify.Net" Version="1.0.1" />
     <PackageReference Include="Reddit" Version="1.4.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0-rc.2.20475.5" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

@@ -19,24 +19,21 @@ namespace Void_Bot
     [Description("Commands that get posts from external websites")]
     public class ExternalCommands : BaseCommandModule
     {
-        public static string[] E6Array = new string[20];
+        public static string[] E6Array = new string[40];
         public static int E6Elem;
         public static Dictionary<string, string> E6Cache = new Dictionary<string, string>();
 
-        public static string[] E9Array = new string[20];
+        public static string[] E9Array = new string[40];
         public static int E9Elem;
         public static Dictionary<string, string> E9Cache = new Dictionary<string, string>();
 
-        public static string[] R34Array = new string[20];
+        public static string[] R34Array = new string[40];
         public static int R34Elem;
         public static Dictionary<string, string> R34Cache = new Dictionary<string, string>();
 
-        public static string[] RedditArray = new string[35];
+        public static string[] RedditArray = new string[45];
         public static int RedditElem;
         public static Dictionary<string, List<Post>> RedditCache = new Dictionary<string, List<Post>>();
-
-        public static string[] EBArray = new string[20];
-        public static int EBElem;
 
         [Command("reddit")]
         [Aliases("rd")]
@@ -79,6 +76,8 @@ namespace Void_Bot
                         Title = "Subreddit could not be found/accessed, please try another!",
                         Color = DiscordColor.Yellow
                     };
+                    embed.WithFooter(
+                        "If this occurs with a known working subreddit, Reddit may be down, so try again in a few minutes.");
                     msg = msg == ctx.Message
                         ? await ctx.RespondAsync(embed: embed.Build())
                         : await msg.ModifyAsync(embed: embed.Build());
@@ -146,7 +145,7 @@ namespace Void_Bot
                     : await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
-                if (RedditElem == 35) RedditElem = 0;
+                if (RedditElem == 45) RedditElem = 0;
             }
             else
             {
@@ -158,12 +157,13 @@ namespace Void_Bot
                 };
                 embed.AddField("Subreddit", "r/" + subreddit);
                 embed.AddField("Link:", $"[Direct Link](https://www.reddit.com{img.Permalink})");
+                embed.WithFooter("No image? Try clicking the link");
                 msg = msg == ctx.Message
                     ? await ctx.RespondAsync(embed: embed.Build())
                     : await msg.ModifyAsync(embed: embed.Build());
                 RedditArray[RedditElem] = img.Permalink;
                 RedditElem += 1;
-                if (RedditElem == 35) RedditElem = 0;
+                if (RedditElem == 45) RedditElem = 0;
             }
 
             Program.Override = false;
@@ -261,7 +261,7 @@ namespace Void_Bot
 
                 E6Array[E6Elem] = img;
                 E6Elem += 1;
-                if (E6Elem == 20) E6Elem = 0;
+                if (E6Elem == 40) E6Elem = 0;
             }
 
             Program.Override = false;
@@ -337,7 +337,7 @@ namespace Void_Bot
 
                 E9Array[E9Elem] = img;
                 E9Elem += 1;
-                if (E9Elem == 20) E9Elem = 0;
+                if (E9Elem == 40) E9Elem = 0;
             }
 
             Program.Override = false;
@@ -433,7 +433,7 @@ namespace Void_Bot
                 else
                     R34Array[R34Elem] = e;
                 R34Elem += 1;
-                if (R34Elem == 20) R34Elem = 0;
+                if (R34Elem == 40) R34Elem = 0;
             }
 
             Program.Override = false;
@@ -473,7 +473,7 @@ namespace Void_Bot
             var url = "https://e621.net/posts/";
             for (var i = 0; i < 1000; i++)
             {
-                var num = random.Next(0, jo["posts"].Count() - 1);
+                var num = random.Next(0, jo["posts"].Count());
                 img = jo["posts"][num]["file"]["url"].ToString();
                 var Break = !img.Contains("swf") && !E6Array.Contains(img);
                 if (!Break) continue;
@@ -519,7 +519,7 @@ namespace Void_Bot
             var url = "https://e926.net/posts/";
             for (var i = 0; i < 1000; i++)
             {
-                var num = random.Next(0, jo["posts"].Count() - 1);
+                var num = random.Next(0, jo["posts"].Count());
                 img = jo["posts"][num]["file"]["url"].ToString();
                 var Break = !img.Contains("swf") && !E6Array.Contains(img);
                 if (!Break) continue;
@@ -559,7 +559,7 @@ namespace Void_Bot
                     URI += "&limit=50";
                 }
 
-                client.Headers.Add("user-agent", "PostmanRuntime/7.25.0");
+                client.Headers.Add("user-agent", "VoidBot/1.0 (by nevardiov)");
                 var data = Stream.Null;
                 try
                 {

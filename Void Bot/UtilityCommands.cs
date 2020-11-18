@@ -119,5 +119,29 @@ namespace Void_Bot
                 await ctx.RespondAsync("Invalid input! (Did you roll a ridiculous amount of dice?)");
             }
         }
+
+        [Command]
+        [Aliases("si")]
+        [Description("Gives various information about the current server")]
+        public async Task ServerInfo(CommandContext ctx)
+        {
+            var g = ctx.Guild;
+            var embed =  new DiscordEmbedBuilder
+            {
+                Color = DiscordColor.DarkGreen,
+                Title = g.Name,
+                Thumbnail = new DiscordEmbedBuilder.EmbedThumbnail{Url = g.IconUrl}
+            };
+            embed.AddField("No. Members", g.MemberCount.ToString(), true);
+            embed.AddField("No. Emoji", g.Emojis.Count.ToString(), true);
+            embed.AddField("No. Channels", g.Channels.Count.ToString(), true);
+            embed.AddField("No. Roles", g.Roles.Count.ToString(), true);
+            embed.AddField("Server Creation Date", g.CreationTimestamp.ToString("F"), true);
+            embed.AddField("Owner", g.Owner.DisplayName, true);
+            embed.AddField("Server Region", g.VoiceRegion.Name, true);
+            embed.AddField("Server ID", g.Id.ToString(), true);
+            embed.AddField("Explicit Content Scan Level", g.ExplicitContentFilter.ToString());
+            await ctx.RespondAsync(embed: embed);
+        }
     }
 }
