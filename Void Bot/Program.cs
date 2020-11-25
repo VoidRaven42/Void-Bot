@@ -104,7 +104,7 @@ namespace Void_Bot
 
             foreach (var commands in Commands.Values)
             {
-                commands.SetHelpFormatter<HelpFormatter>();
+                //commands.SetHelpFormatter<HelpFormatter>();
                 commands.RegisterCommands<Commands>();
                 commands.RegisterCommands<UtilityCommands>();
                 commands.RegisterCommands<AudioCommands>();
@@ -274,7 +274,7 @@ namespace Void_Bot
                 };
                 var guild = await e.Context.Client.GetGuildAsync(750409700750786632);
                 await guild.GetChannel(750787712625410208).SendMessageAsync(embed: embed);
-                return;
+                throw e.Exception;
             }
 
             e.Context.Client.Logger.Log(LogLevel.Error,

@@ -194,7 +194,7 @@ namespace Void_Bot
 
         [Command("e621")]
         [Aliases("e6")]
-        [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
+        [Description("Gets one of the top 50 posts from e621.net (furry, nsfw) by score for the specified tags, or all posts if no tags specified")]
         [Hidden]
         public async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
@@ -203,7 +203,7 @@ namespace Void_Bot
 
         [Command("e926")]
         [Aliases("e9")]
-        [Description("Gets one of the top 50 posts by score for the specified tags, or all posts if no tags specified")]
+        [Description("Gets one of the top 50 posts from e926.net (furry, sfw) by score for the specified tags, or all posts if no tags specified")]
         [Hidden]
         public async Task E926(CommandContext ctx, [RemainingText] string tags)
         {
@@ -212,6 +212,7 @@ namespace Void_Bot
 
         [Command("rule34")]
         [Aliases("r34")]
+        [Description("Gets one of the top 50 posts from rule34.xxx (nsfw) by score for the specified tags, or all posts if no tags specified")]
         [Hidden]
         public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
