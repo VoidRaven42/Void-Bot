@@ -452,8 +452,8 @@ namespace Void_Bot
                 if (tags != null)
                 {
                     var tagstring = "";
-                    foreach (var elem in tags) tagstring = tagstring + elem + "+";
-                    URI = URI + "?tags=" + tagstring + "order:score";
+                    foreach (var elem in tags) tagstring = tagstring + "+" + elem;
+                    URI = URI + "?tags=" + "order:score" + tagstring;
                     URI += "&limit=50";
                 }
 
@@ -498,8 +498,8 @@ namespace Void_Bot
                 if (tags != null)
                 {
                     var tagstring = "";
-                    foreach (var elem in tags) tagstring = tagstring + elem + "+";
-                    URI = URI + "?tags=" + tagstring + "order:score";
+                    foreach (var elem in tags) tagstring = tagstring + "+" + elem;
+                    URI = URI + "?tags=" + "order:score" + tagstring;
                     URI += "&limit=50";
                 }
 

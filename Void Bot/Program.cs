@@ -30,9 +30,15 @@ namespace Void_Bot
 
         private static readonly string token = File.ReadAllText("token.txt");
 
+        public static Dictionary<ulong, DiscordChannel> Monitor = new Dictionary<ulong, DiscordChannel>();
+
+        public static Dictionary<ulong, bool> Ratelimit = new Dictionary<ulong, bool>();
+
         public static bool CustomStatus = false;
 
         public static bool Override;
+
+        public static ulong ToJail = 0;
 
         public static ConnectionEndpoint endpoint = new ConnectionEndpoint
         {
@@ -94,6 +100,7 @@ namespace Void_Bot
 
             discord.GuildMemberAdded += Discord_GuildMemberAdded;
             discord.GuildCreated += Discord_GuildCreated;
+            discord.VoiceStateUpdated += Discord_VoiceStateUpdated;
 
             Commands = await discord.UseCommandsNextAsync(new CommandsNextConfiguration
             {
@@ -176,6 +183,41 @@ namespace Void_Bot
                 {
                     await Task.Delay(1000);
                 }
+        }
+
+        private static async Task Discord_VoiceStateUpdated(DiscordClient sender, VoiceStateUpdateEventArgs e)
+        {
+            if (!Ratelimit.ContainsKey(e.Guild.Id))
+            {
+                Ratelimit.Add(e.Guild.Id, false);
+            }
+
+            if (Monitor.ContainsKey(e.Guild.Id) && (e.After.IsSelfMuted || e.After.Channel == null) &&
+                !Ratelimit[e.Guild.Id])
+            {
+                RatelimitMethod(e.Guild.Id);
+                await Monitor[e.Guild.Id].SendMessageAsync(
+                    embed: new DiscordEmbedBuilder
+                    {
+                        Title = "Alert!",
+                        Description =
+                            $"{e.User.Mention} has muted in/left `{e.Before.Channel.Name}`, they may be having sex!",
+                        Color = DiscordColor.Red
+                    }.WithFooter("Sex Monitoring Service (SMS) Supplied by Void Bot"));
+            }
+
+            if (e.User.Id == ToJail && ToJail != 0 && e.Before.Channel != null && e.After.Channel.Id != 775857887326502954)
+            {
+                await e.Guild.GetChannel(775857887326502954)
+                    .PlaceMemberAsync(await e.Guild.GetMemberAsync(ToJail));
+            }
+        }
+
+        private static async Task RatelimitMethod(ulong gid)
+        {
+            Ratelimit[gid] = true;
+            Thread.Sleep(5000);
+            Ratelimit[gid] = false;
         }
 
         private static async Task Discord_GuildCreated(DiscordClient sender, GuildCreateEventArgs e)

@@ -431,6 +431,35 @@ namespace Void_Bot
 
         [Command]
         [Hidden]
+        public async Task Monitor(CommandContext ctx)
+        {
+            if (Program.Monitor.ContainsKey(ctx.Guild.Id))
+            {
+                await ctx.RespondAsync("Already monitoring!");
+                return;
+            }
+            Program.Monitor.Add(ctx.Guild.Id, ctx.Channel);
+            await ctx.RespondAsync($"Monitoring started and bound to `#{ctx.Channel.Name}`");
+        }
+
+        [Command]
+        [Hidden]
+        public async Task MonitorStop(CommandContext ctx)
+        {
+            if (Program.Monitor.ContainsKey(ctx.Guild.Id))
+            {
+                Program.Monitor.Remove(ctx.Guild.Id);
+                await ctx.RespondAsync($"Successfully removed monitor for `{ctx.Guild.Name}`");
+            }
+            else
+            {
+                await ctx.RespondAsync("No monitor currently running.");
+            }
+
+        }
+
+        [Command]
+        [Hidden]
         public async Task Restart(CommandContext ctx)
         {
             if (ctx.User.Id == 379708744843395073)
