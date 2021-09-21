@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json.Linq;
 using Reddit;
 using Reddit.Controllers;
@@ -34,6 +35,8 @@ namespace Void_Bot
         public static string[] RedditArray = new string[45];
         public static int RedditElem;
         public static Dictionary<string, List<Post>> RedditCache = new Dictionary<string, List<Post>>();
+
+        private static readonly SQLUtils sqlUtils = new SQLUtils();
 
         [Command("reddit")]
         [Aliases("rd")]
@@ -84,7 +87,7 @@ namespace Void_Bot
                     return;
                 }
 
-                if (sub.Over18.Value && !ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
+                if (sub.Over18.Value && !ctx.Channel.IsNSFW && !Program.Override && ctx.Channel.Id != 778689148059385857 && !ctx.Channel.IsPrivate)
                 {
                     embed = new DiscordEmbedBuilder
                     {
@@ -100,7 +103,7 @@ namespace Void_Bot
                 hot = sub.Posts.Hot;
                 RedditCache.Add(subreddit, hot);
             }
-            
+
 
             Post img = null;
             var allownsfw = ctx.Channel.IsNSFW;
@@ -179,10 +182,13 @@ namespace Void_Bot
 
         [Command("e621")]
         [Aliases("e6")]
-        [Description("Gets one of the top 50 posts from e621.net (furry, nsfw) by score for the specified tags, or all posts if no tags specified")]
+        [Description(
+            "Gets one of the top 50 posts from e621.net (furry, nsfw) by score for the specified tags, or all posts if no tags specified")]
         public async Task E621(CommandContext ctx, [RemainingText] string tags)
         {
-            if (!ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
+            if (tags == null) tags = "";
+
+            if (!ctx.Channel.IsNSFW && !Program.Override && ctx.Channel.Id != 778689148059385857 && !ctx.Channel.IsPrivate)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
                 Thread.Sleep(1000);
@@ -197,7 +203,7 @@ namespace Void_Bot
 
             var Embed = new DiscordEmbedBuilder();
             var msg = ctx.Message;
-            if (!E6Cache.ContainsKey(tags))
+            /*if (!E6Cache.ContainsKey(tags))
             {
                 Embed = new DiscordEmbedBuilder
                 {
@@ -205,7 +211,7 @@ namespace Void_Bot
                     Color = DiscordColor.Yellow
                 };
                 msg = await ctx.RespondAsync(embed: Embed.Build());
-            }
+            }*/
 
             var tagssplit = new List<string>();
             if (tags != null) tagssplit = tags.Split(' ').ToList();
@@ -253,9 +259,10 @@ namespace Void_Bot
                     Embed.AddField("Requested by:", ctx.User.Username + '#' + ctx.User.Discriminator);
                     Embed.AddField("Link:", $"[Direct Link]({direct})");
                     Embed.WithFooter("No image? Try clicking the link");
-                    msg = msg == ctx.Message
-                        ? await ctx.RespondAsync(embed: Embed.Build())
-                        : await msg.ModifyAsync(embed: Embed.Build());
+                    /*msg = msg == ctx.Message
+                        ? */
+                    await ctx.RespondAsync(embed: Embed.Build());
+                    //: await msg.ModifyAsync(embed: Embed.Build());
                 }
 
 
@@ -269,9 +276,12 @@ namespace Void_Bot
 
         [Command("e926")]
         [Aliases("e9")]
-        [Description("Gets one of the top 50 posts from e926.net (furry, sfw) by score for the specified tags, or all posts if no tags specified")]
+        [Description(
+            "Gets one of the top 50 posts from e926.net (furry, sfw) by score for the specified tags, or all posts if no tags specified")]
         public async Task E926(CommandContext ctx, [RemainingText] string tags)
         {
+            if (tags == null) tags = "";
+
             var Embed = new DiscordEmbedBuilder();
             var msg = ctx.Message;
             if (!E9Cache.ContainsKey(tags))
@@ -345,10 +355,13 @@ namespace Void_Bot
 
         [Command("rule34")]
         [Aliases("r34")]
-        [Description("Gets one of the top 50 posts from rule34.xxx (nsfw) by score for the specified tags, or all posts if no tags specified")]
+        [Description(
+            "Gets one of the top 50 posts from rule34.xxx (nsfw) by score for the specified tags, or all posts if no tags specified")]
         public async Task R34(CommandContext ctx, [RemainingText] string tags)
         {
-            if (!ctx.Channel.IsNSFW && !Program.Override && !ctx.Channel.IsPrivate)
+            if (tags == null) tags = "";
+
+            if (!ctx.Channel.IsNSFW && !Program.Override && ctx.Channel.Id != 778689148059385857 && !ctx.Channel.IsPrivate)
             {
                 var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
                 Thread.Sleep(1000);
@@ -437,6 +450,51 @@ namespace Void_Bot
             }
 
             Program.Override = false;
+        }
+
+        [Command]
+        [Aliases("yfr")]
+        [Hidden]
+        public async Task Yiffer(CommandContext ctx, [RemainingText] string input)
+        {
+            if (!ctx.Channel.IsNSFW && !Program.Override && ctx.Channel.Id != 778689148059385857 && !ctx.Channel.IsPrivate)
+            {
+                var message2 = await ctx.RespondAsync("Channel must be NSFW for this command");
+                Thread.Sleep(1000);
+                IReadOnlyList<DiscordMessage> messages2 = new DiscordMessage[2]
+                {
+                    ctx.Message,
+                    message2
+                };
+                await ctx.Channel.DeleteMessagesAsync(messages2);
+                return;
+            }
+            var query = $"SELECT cname, activepage FROM yiffer WHERE uid='{ctx.User.Id}'";
+            var cmd = new MySqlCommand(query, sqlUtils.conn);
+            var rdr = cmd.ExecuteReader();
+            if (rdr != null)
+            {
+                var comic = rdr[0];
+                var page = rdr[1];
+            }
+            
+            if (input == null)
+            { 
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "No Records Found!",
+                    Description =
+                        $"We couldn't find a previous use of this command, please use {ctx.Prefix}yfr new to load a new comic!",
+                    Color = DiscordColor.Red
+                };
+                await ctx.RespondAsync(embed: embed);
+                return;
+            }
+
+
+            var split = input.Split(' ', 2);
+            var subcommand = split[0];
+            var args = split[1];
         }
 
         public async Task<string> E6HttpGet(string URI, string[] tags, string rawtags)

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity.Extensions;
 using Owoify;
 
@@ -127,7 +128,7 @@ namespace Void_Bot
         [Description("SPEEN")]
         public async Task Speen(CommandContext ctx)
         {
-            await ctx.RespondWithFileAsync("speen.mp4");
+            await ctx.RespondAsync("https://cdn.discordapp.com/attachments/834849331453755513/834849636698685440/speen.mp4");
         }
 
         [Command("gun")]
@@ -135,14 +136,14 @@ namespace Void_Bot
         [Description("gun.")]
         public async Task Gun(CommandContext ctx)
         {
-            await ctx.RespondWithFileAsync("gun.mp4");
+            await ctx.RespondAsync("https://cdn.discordapp.com/attachments/834849331453755513/834849575654391868/gun.mp4");
         }
 
         [Command("no")]
         [Description("no.")]
         public async Task No(CommandContext ctx)
         {
-            await ctx.RespondWithFileAsync("no.mp4");
+            await ctx.RespondAsync("https://cdn.discordapp.com/attachments/834849331453755513/834849590859661332/no.mp4");
         }
 
         [Command("loaf")]
@@ -196,7 +197,7 @@ namespace Void_Bot
         [Description("the whole bee movie.")]
         public async Task BeeMovie(CommandContext ctx)
         {
-            await ctx.RespondWithFileAsync("beemovie.png");
+            await ctx.RespondAsync("https://cdn.discordapp.com/attachments/834849331453755513/834849514153443368/beemovie.png");
         }
 
         [Command("fuckoff")]
@@ -215,7 +216,13 @@ namespace Void_Bot
         [Command]
         public async Task Owoify(CommandContext ctx, [RemainingText] string input)
         {
-            await ctx.RespondAsync(Owoifier.Owoify(input));
+            await ctx.RespondAsync(embed: new DiscordEmbedBuilder
+            {
+                Description = Owoifier.Owoify(input, Owoifier.OwoifyLevel.Uwu).Replace("`", "\\`").Replace("*", "\\*")
+                    .Replace("_", "\\_"),
+                Color = DiscordColor.HotPink
+            }.Build());
+            await ctx.Message.DeleteAsync();
         }
     }
 }

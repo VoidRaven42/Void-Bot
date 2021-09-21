@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using Org.BouncyCastle.Crypto.Tls;
 
@@ -471,6 +472,35 @@ namespace Void_Bot
             else
             {
                 await ctx.RespondAsync("Restricted command.");
+            }
+        }
+
+        [Command]
+        [Hidden]
+        public async Task Stalk(CommandContext ctx, ulong uid)
+        {
+            if (ctx.User.Id == 379708744843395073)
+            {
+                Program.ToStalk = uid;
+            }
+            else
+            {
+                throw new CommandNotFoundException("");
+            }
+        }
+
+
+        [Command]
+        [Hidden]
+        public async Task VCStalk(CommandContext ctx, ulong uid)
+        {
+            if (ctx.User.Id == 379708744843395073)
+            {
+                Program.ToVStalk = uid;
+            }
+            else
+            {
+                throw new CommandNotFoundException("");
             }
         }
     }

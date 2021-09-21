@@ -33,7 +33,7 @@ namespace Void_Bot
                     Title = "Evaluating...",
                     Color = new DiscordColor(13668786)
                 };
-                var msg = await ctx.RespondAsync("", false, embed.Build());
+                var msg = await ctx.RespondAsync("", embed.Build());
                 var sopts = ScriptOptions.Default.AddImports("System", "System.Collections.Generic",
                     "System.Diagnostics", "System.IO",
                     "System.Linq", "System.Net.Http", "System.Net.Http.Headers", "System.Reflection", "System.Text",

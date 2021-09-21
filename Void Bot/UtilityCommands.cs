@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -134,8 +135,8 @@ namespace Void_Bot
             };
             embed.AddField("No. Members", g.MemberCount.ToString(), true);
             embed.AddField("No. Emoji", g.Emojis.Count.ToString(), true);
-            embed.AddField("No. Channels", g.Channels.Count.ToString(), true);
-            embed.AddField("No. Roles", g.Roles.Count.ToString(), true);
+            embed.AddField("No. Channels", g.Channels.Values.Count(x => !x.IsCategory).ToString(), true);
+            embed.AddField("No. Roles", g.Roles.Values.Count().ToString(), true);
             embed.AddField("Server Creation Date", g.CreationTimestamp.ToString("F"), true);
             embed.AddField("Owner", g.Owner.DisplayName, true);
             embed.AddField("Server Region", g.VoiceRegion.Name, true);

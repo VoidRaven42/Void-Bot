@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +11,9 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.Entities;
 using HSNXT.DSharpPlus.ModernEmbedBuilder;
+using Microsoft.Extensions.Logging;
 using MoreLinq;
+using MySql.Data.MySqlClient;
 
 namespace Void_Bot
 {
@@ -121,6 +125,25 @@ namespace Void_Bot
             return categoryAttribute != null
                 ? categoryAttribute.Category
                 : command.Module.ModuleType.Namespace?.Split('.').Last();
+        }
+    }
+
+    internal class SQLUtils
+    {
+        private static readonly string dbinfo = File.ReadAllText(@"sqlinfo.txt");
+
+        public readonly MySqlConnection conn = new MySqlConnection(dbinfo);
+        public SQLUtils()
+        {
+            try
+            {
+                conn.Open();
+                Program.discord.Logger.Log(LogLevel.Information, "Connected to SQL DB.");
+            }
+            catch (Exception ex)
+            {
+                Program.discord.Logger.Log(LogLevel.Error, "Could not connect to SQL DB.");
+            }
         }
     }
 }

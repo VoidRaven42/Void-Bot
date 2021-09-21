@@ -451,6 +451,14 @@ namespace Void_Bot
             await ctx.RespondAsync("All members unmuted!");
         }
 
+        /*[Command]
+        [Aliases("dca")]
+        [RequirePermissions(Permissions.MoveMembers)]
+        public async Task DisconnectAll(CommandContext ctx)
+        {
+            foreach (var elem in ctx.Member.VoiceState.Channel.Users) await elem.PlaceInAsync(null);
+        }*/
+
         [Command]
         [Aliases("tts")]
         public async Task TextToSpeech(CommandContext ctx, [RemainingText] string inputstring)
@@ -465,7 +473,7 @@ namespace Void_Bot
 
             var voice = new VoiceSelectionParams
             {
-                LanguageCode = "en-US",
+                LanguageCode = "fr",
                 SsmlGender = SsmlVoiceGender.Neutral
             };
 

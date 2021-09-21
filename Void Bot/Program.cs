@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -40,10 +37,14 @@ namespace Void_Bot
 
         public static ulong ToJail = 0;
 
+        public static ulong ToStalk;
+
+        public static ulong ToVStalk;
+
         public static ConnectionEndpoint endpoint = new ConnectionEndpoint
         {
             Hostname = "127.0.0.1",
-            Port = 2333
+            Port = 57345
         };
 
         public static LavalinkConfiguration lavalinkConfig = new LavalinkConfiguration
@@ -124,43 +125,36 @@ namespace Void_Bot
 
 
             discord.MessageCreated += Discord_MessageCreated;
+            discord.PresenceUpdated += Discord_PresenceUpdated;
             await discord.StartAsync();
 
-            try
-            {
-                foreach (var extension in Lavalink.Values)
-                    AudioCommands.Lavalink = await extension.ConnectAsync(lavalinkConfig);
-                discord.Logger.Log(LogLevel.Information, "Connected to Lavalink!");
-            }
-            catch (Exception ex)
-            {
-                if (ex is SocketException || ex is HttpRequestException || ex is WebSocketException)
-                    Console.WriteLine("Can't connect to Lavalink! (music commands are disabled)");
-                else
-                    throw;
-            }
+
+            foreach (var extension in Lavalink.Values)
+                AudioCommands.Lavalink = await extension.ConnectAsync(lavalinkConfig);
+            discord.Logger.Log(LogLevel.Information, "Connected to Lavalink.");
+
 
             await Task.Delay(2000);
             while (true)
                 try
                 {
-                    if (!CustomStatus)
+                    /*if (!CustomStatus)
                     {
-                        var amount = 0;
-                        foreach (var elem in discord.ShardClients.Values)
-                        foreach (var guild in elem.Guilds)
-                            amount += guild.Value.MemberCount;
+                        var totalmems = (from elem in discord.ShardClients.Values
+                            from guild in elem.Guilds
+                            from mem in guild.Value.Members.Values.Where(x => !x.IsBot)
+                            select mem.Id).ToList();
+                        var amount = totalmems.Distinct().Count();
                         var status = amount + " users";
                         var activity = new DiscordActivity(status, ActivityType.Watching);
                         await discord.UpdateStatusAsync(activity);
                     }
 
-                    await Task.Delay(TimeSpan.FromMinutes(1));
+                    await Task.Delay(TimeSpan.FromMinutes(1));*/
 
                     if (!CustomStatus)
                     {
-                        var amount = 0;
-                        foreach (var elem in discord.ShardClients.Values) amount += elem.Guilds.Count;
+                        var amount = discord.ShardClients.Values.Sum(elem => elem.Guilds.Count);
 
                         var status = amount + " servers";
                         var activity = new DiscordActivity(status, ActivityType.Watching);
@@ -185,17 +179,60 @@ namespace Void_Bot
                 }
         }
 
+        private static async Task Discord_PresenceUpdated(DiscordClient sender, PresenceUpdateEventArgs e)
+        {
+            if (e.User.Id == ToStalk)
+            {
+                var guild = await sender.GetGuildAsync(750409700750786632);
+                for (var i = 0; i < 3; i++)
+                    await guild.GetChannel(770439341620330497).SendMessageAsync(
+                        $"{e.User.Username}'s activity has changed! ({e.PresenceBefore.Status} => {e.PresenceAfter.Status})");
+                ToStalk = 0;
+            }
+        }
+
         private static async Task Discord_VoiceStateUpdated(DiscordClient sender, VoiceStateUpdateEventArgs e)
         {
-            if (!Ratelimit.ContainsKey(e.Guild.Id))
+            if (!Ratelimit.ContainsKey(e.Guild.Id)) Ratelimit.Add(e.Guild.Id, false);
+
+            if (e.User.Id == ToVStalk)
             {
-                Ratelimit.Add(e.Guild.Id, false);
+                var guild = await sender.GetGuildAsync(750409700750786632);
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = "User Voice Activity Change",
+                    Color = DiscordColor.Azure
+                };
+                embed.AddField("User", e.User.Username + '#' + e.User.Discriminator);
+                if (e.Before is null)
+                {
+                    embed.AddField("Before", "N/A", true);
+                }
+                else
+                {
+                    embed.AddField("Before",
+                        $"Server: {e.Before.Guild.Name} - {e.Before.Guild.Id.ToString()}\n" +
+                        $"Channel: {(e.Before.Channel == null ? "None" : e.Before.Channel.Name)} - {(e.Before.Channel == null ? "None" : e.Before.Channel.Id.ToString())}\n\n" +
+                        $"IsSelfMuted: {e.Before.IsSelfMuted}\nIsSelfDeafened: {e.Before.IsSelfDeafened}\nIsServerMuted: {e.Before.IsServerMuted}\n" +
+                        $"IsServerDeafened: {e.Before.IsServerDeafened}",
+                        true);
+                }
+                    
+
+                embed.AddField("After",
+                    $"Server: {e.After.Guild.Name} - {e.After.Guild.Id}\n" +
+                    $"Channel: {(e.After.Channel == null ? "None" : e.After.Channel.Name)} - {(e.After.Channel == null ? "None" : e.After.Channel.Id.ToString())}\n\n" +
+                    $"IsSelfMuted: {e.After.IsSelfMuted}\nIsSelfDeafened: {e.After.IsSelfDeafened}\nIsServerMuted: {e.After.IsServerMuted}\n" +
+                    $"IsServerDeafened: {e.After.IsServerDeafened}",
+                    true);
+
+                await guild.GetChannel(770439341620330497).SendMessageAsync(embed: embed);
             }
 
             if (Monitor.ContainsKey(e.Guild.Id) && (e.After.IsSelfMuted || e.After.Channel == null) &&
                 !Ratelimit[e.Guild.Id])
             {
-                RatelimitMethod(e.Guild.Id);
+                await RatelimitMethod(e.Guild.Id);
                 await Monitor[e.Guild.Id].SendMessageAsync(
                     embed: new DiscordEmbedBuilder
                     {
@@ -206,11 +243,10 @@ namespace Void_Bot
                     }.WithFooter("Sex Monitoring Service (SMS) Supplied by Void Bot"));
             }
 
-            if (e.User.Id == ToJail && ToJail != 0 && e.Before.Channel != null && e.After.Channel.Id != 775857887326502954)
-            {
+            if (e.User.Id == ToJail && ToJail != 0 && e.Before.Channel != null &&
+                e.After.Channel.Id != 775857887326502954)
                 await e.Guild.GetChannel(775857887326502954)
                     .PlaceMemberAsync(await e.Guild.GetMemberAsync(ToJail));
-            }
         }
 
         private static async Task RatelimitMethod(ulong gid)
@@ -228,7 +264,6 @@ namespace Void_Bot
                 Title = "Guild Joined",
                 Description =
                     $"New guild joined.\n```Name: {e.Guild.Name}\nID: {e.Guild.Id}\nNo. members: {e.Guild.MemberCount}" +
-                    $"\nNo. members exc. bots: {e.Guild.Members.Values.Count(x => !x.IsBot)}" +
                     $"\n\nOwner Name: {e.Guild.Owner.DisplayName + '#' + e.Guild.Owner.Discriminator}" +
                     $"\nOwner ID: {e.Guild.Owner.Id}```"
             }.Build());
@@ -323,7 +358,7 @@ namespace Void_Bot
                 $"User '{e.Context.User.Username}#{e.Context.User.Discriminator}' ({e.Context.User.Id}) tried to execute '{e.Command?.QualifiedName ?? "<unknown command>"}' " +
                 $"in #{e.Context.Channel.Name} ({e.Context.Channel.Id}) in {e.Context.Guild.Name} ({e.Context.Guild.Id}) and failed with {e.Exception.GetType()}: {e.Exception.Message}",
                 DateTime.Now);
-            if (embed != null) await e.Context.RespondAsync("", false, embed.Build());
+            if (embed != null) await e.Context.RespondAsync("", embed.Build());
         }
 
         private static async Task Commands_CommandExecuted(CommandsNextExtension ext, CommandExecutionEventArgs e)
@@ -346,12 +381,11 @@ namespace Void_Bot
             Embed.AddField("Welcome to ", e.Guild.Name, true);
             Embed.AddField("New member: ", e.Member.DisplayName + "#" + e.Member.Discriminator, true);
             if (e.Guild.SystemChannel != null)
-                await e.Guild.SystemChannel.SendMessageAsync(null, false, Embed);
+                await e.Guild.SystemChannel.SendMessageAsync(null, Embed);
         }
 
         private static void OnProcessExit(object sender, EventArgs e)
         {
-            Console.WriteLine("Disconnecting from all shards, then exiting in 2 seconds");
             foreach (var elem in discord.ShardClients.Values) elem.DisconnectAsync();
             Thread.Sleep(2000);
         }
